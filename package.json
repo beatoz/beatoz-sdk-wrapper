@@ -1,0 +1,22 @@
+{
+  "name": "beatoz-sdk-wrapper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@beatoz/web3": "^1.6.5",
+    "@beatoz/web3-accounts": "^1.6.5",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.6.1",
+    "ethers": "^6.15.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.4"
+  },
+  "private": true
+}
