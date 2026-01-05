@@ -52,12 +52,15 @@ export class BeatozTxResult {
   }
 
 	static fromTxCommitResponse(txCommitResponse: BroadcastTxCommitResponse) {
-		const result = this.getTxCommitResult(txCommitResponse)
+      const result = this.getTxCommitResult(txCommitResponse)
       let returnData: string = ""
       let errorInfo: ErrorInfo | null = null
 
       if (result) {
-        returnData = Buffer.from(txCommitResponse.deliver_tx!.data!, 'base64').toString('hex')
+        const data = txCommitResponse.deliver_tx?.data;
+        if (data !== undefined && data !== null && data !== '') {
+          returnData = Buffer.from(data, 'base64').toString('hex');
+        }
       } else {
         if (txCommitResponse.check_tx?.code != 0) {
           txCommitResponse.check_tx!.code
@@ -71,12 +74,8 @@ export class BeatozTxResult {
         }
       }
 
-		const events = txCommitResponse.deliver_tx?.events
-		if (events == undefined) {
-			throw new Error("Events not found")
-		}
-
-		return new BeatozTxResult(txCommitResponse.hash, result, returnData, events, errorInfo)
+      const events = txCommitResponse.deliver_tx?.events ?? []
+      return new BeatozTxResult(txCommitResponse.hash, result, returnData, events, errorInfo)
 	}
 
 	static getTxCommitResult(response: BroadcastTxCommitResponse): boolean {
