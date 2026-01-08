@@ -2,6 +2,7 @@
 
 import path from "node:path"
 import fs from "fs"
+import {ContractJson} from "./contract-json";
 
 export class ContractJsonReader {
 	private readonly baseDir: string
@@ -16,14 +17,18 @@ export class ContractJsonReader {
 		this.baseDir = baseDir
 	}
 
-	readContractJson(contractName: string): any {
-		const contractJsonFilePath = path.join(this.baseDir, `${contractName}.sol`, `${contractName}.json`)
-		if (!fs.existsSync(contractJsonFilePath)) {
-			throw new Error(`Contract JSON file does not exist: ${contractJsonFilePath}`)
-		}
-		const fileContent = fs.readFileSync(contractJsonFilePath, "utf8")
-		return JSON.parse(fileContent)
-	}
+    static readContractJson(contractJsonFilePath: string): ContractJson {
+      if (!fs.existsSync(contractJsonFilePath)) {
+        throw new Error(`Contract JSON file does not exist: ${contractJsonFilePath}`)
+      }
+      const fileContent = fs.readFileSync(contractJsonFilePath, "utf8")
+      return ContractJson.FromJsonString(fileContent)
+    }
+
+  readContractJson(contractName: string): ContractJson {
+    const contractJsonFilePath = path.join(this.baseDir, `${contractName}.sol`, `${contractName}.json`)
+    return ContractJsonReader.readContractJson(contractJsonFilePath)
+  }
 
 	private validateDir(dirPath: string) {
 		if (!fs.existsSync(dirPath)) {

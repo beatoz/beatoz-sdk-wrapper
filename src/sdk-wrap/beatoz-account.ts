@@ -1,7 +1,7 @@
 /** @format */
 
-import { Web3Account } from "@beatoz/web3-accounts"
-import { TrxProto } from "@beatoz/web3-types/lib/commonjs/trx_proto"
+import {Web3Account} from "@beatoz/web3-accounts"
+import {TrxProto} from "@beatoz/web3-types/lib/commonjs/trx_proto"
 import {BeatozChain} from "./beatoz-chain";
 
 export class BeatozAccount {

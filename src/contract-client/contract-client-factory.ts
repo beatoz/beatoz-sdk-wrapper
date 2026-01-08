@@ -1,8 +1,7 @@
 /** @format */
-import { ContractJsonReader } from "../sdk-wrap/contract-json-reader"
-import { StableCoinClient } from "./stablecoin-client"
-import { StablecoinIssuanceClient } from "./stablecoin-issuance-client"
-import {BeatozChain} from "../sdk-wrap/beatoz-chain";
+import { BeatozChain, ContractJsonReader } from "../sdk-wrap";
+import { StableCoinClient } from "./stablecoin-client";
+import { StablecoinIssuanceClient } from "./stablecoin-issuance-client";
 
 export class ContractClientFactory {
 	constructor(

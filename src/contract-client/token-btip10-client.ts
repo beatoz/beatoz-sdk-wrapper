@@ -1,11 +1,14 @@
-import {BeatozConverter} from "../sdk-wrap/beatoz-converter";
-import {PostMessage} from "./type/issue-stablecoin";
-import {Interface} from "ethers";
-import {ContractJsonReader} from "../sdk-wrap/contract-json-reader";
-import {BeatozContract} from "../sdk-wrap/beatoz-contract";
-import {BeatozEvmEventService} from "../sdk-wrap/beatoz-contract-event";
-import {BeatozChain} from "../sdk-wrap/beatoz-chain";
-import {BeatozAccount} from "../sdk-wrap/beatoz-account";
+import { Interface } from "ethers";
+import {
+  BeatozAccount,
+  BeatozChain,
+  BeatozContract,
+  BeatozConverter,
+  BeatozEvmEventService,
+  ContractJsonReader,
+} from "../sdk-wrap";
+import { BeatozContractDeployer } from "../sdk-wrap/beatoz-contract-deployer";
+import { PostMessage } from "./type/issue-stablecoin";
 
 export class TokenBTIP10Client extends BeatozContract {
   static CONTRACT_NAME = "TokenBTIP10"
@@ -15,6 +18,11 @@ export class TokenBTIP10Client extends BeatozContract {
 
   readonly postMessageHash: string = ""
   readonly postMessageEventFragment: any = undefined
+
+  static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount, tokenName: string, tokenSymbol: string) {
+    const contractAddress = await contractDeployer.deploy(TokenBTIP10Client.CONTRACT_NAME, deployAccount, [tokenName, tokenSymbol, deployAccount.address])
+    return contractAddress
+  }
 
   static create(btzWeb3: BeatozChain, contractJsonReader: ContractJsonReader, contractAddress: string, linkerEndpointContractName: string) {
     const btip10TokenContractJson = contractJsonReader.readContractJson(this.CONTRACT_NAME)
@@ -97,6 +105,11 @@ export class TokenBTIP10Client extends BeatozContract {
     const result = await this.contract.methods.symbol().call()
     return this.converter.convertString(result)
     //return this.convertString(result)
+  }
+
+  async decimals() {
+    const result = await this.contract.methods.decimals().call()
+    return this.converter.convertString(result)
   }
 
   async transfer(fromAccount: BeatozAccount, toAddress: string, amount: string) {

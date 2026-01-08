@@ -52,7 +52,7 @@ export class BeatozTxResult {
   }
 
 	static fromTxCommitResponse(txCommitResponse: BroadcastTxCommitResponse) {
-      const result = this.getTxCommitResult(txCommitResponse)
+      const result = this.isSuccess(txCommitResponse)
       let returnData: string = ""
       let errorInfo: ErrorInfo | null = null
 
@@ -78,7 +78,7 @@ export class BeatozTxResult {
       return new BeatozTxResult(txCommitResponse.hash, result, returnData, events, errorInfo)
 	}
 
-	static getTxCommitResult(response: BroadcastTxCommitResponse): boolean {
+	static isSuccess(response: BroadcastTxCommitResponse): boolean {
 		return response.check_tx?.code == 0 && response.deliver_tx?.code == 0
 	}
 }

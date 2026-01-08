@@ -10,7 +10,7 @@ export type BeatozNetworkInfo = {
 	[K in BeatozNetworkType]: NetworkInfo
 }
 
-export class BeatozFacadeConfig {
+export class BeatozWrapConfig {
 	private networks: BeatozNetworkInfo
 	private contractJsonDir: string
 

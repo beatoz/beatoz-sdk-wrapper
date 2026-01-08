@@ -5,6 +5,7 @@ import { BeatozTxResult } from "./beatoz-tx-result"
 import {BeatozConverter} from "./beatoz-converter";
 import {BeatozChain} from "./beatoz-chain";
 import {BeatozAccount} from "./beatoz-account";
+import {ContractJson} from "./contract-json";
 
 export class BeatozContract {
 	readonly btz: BeatozChain
@@ -13,14 +14,14 @@ export class BeatozContract {
 	readonly contract: any
     readonly converter: BeatozConverter
 
-	constructor(btzWeb3: BeatozChain, contractAddress: string, contractJson: any) {
+	constructor(btzWeb3: BeatozChain, contractAddress: string, contractJson: ContractJson) {
 		if (contractAddress == undefined || contractAddress == "") {
 			throw new Error("contractAddress is undefined")
 		}
 		this.btz = btzWeb3
 		this.contractAddress = contractAddress
-		this.contractInterface = new Interface(contractJson.abi)
-		this.contract = new this.btz.web3.beatoz.Contract(contractJson.abi, contractAddress)
+		this.contractInterface = new Interface(contractJson.abi())
+		this.contract = new this.btz.web3.beatoz.Contract(contractJson.abi(), contractAddress)
         this.converter = this.btz.beatozConverter()
 	}
 

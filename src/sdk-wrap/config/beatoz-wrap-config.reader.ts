@@ -2,19 +2,19 @@
 
 import path from "path"
 import fs from "fs"
-import { BeatozFacadeConfig, BeatozNetworkInfo } from "./beatoz-facade.config"
+import { BeatozWrapConfig, BeatozNetworkInfo } from "./beatoz-wrap.config"
 
-export class BeatozFacadeConfigReader {
+export class BeatozWrapConfigReader {
 	static DEFAULT_CONFIG_DIR = "./config"
 	// static DEFAULT_CONFIG_FILE = "beatoz.facade.config.json"
 	static DEFAULT_CONFIG_FILE = "beatoz.network.json"
 
-	static loadDefault(configDirPath: string): BeatozFacadeConfig {
+	static loadDefault(configDirPath: string): BeatozWrapConfig {
 		const configFilePath = path.join(configDirPath, this.DEFAULT_CONFIG_FILE)
 		return this.fromFile(configFilePath)
 	}
 
-	static fromFile(filePath: string): BeatozFacadeConfig {
+	static fromFile(filePath: string): BeatozWrapConfig {
 		if (!fs.existsSync(filePath)) {
 			throw new Error(`Network configuration file not found: ${filePath}`)
 		}
@@ -25,7 +25,7 @@ export class BeatozFacadeConfigReader {
 		return this.fromJSON(config)
 	}
 
-	static fromJSON(json: any): BeatozFacadeConfig {
+	static fromJSON(json: any): BeatozWrapConfig {
 		if (!json.beatozNetworks) {
 			throw new Error("Missing required field: beatozNetworks")
 		}
@@ -42,7 +42,7 @@ export class BeatozFacadeConfigReader {
 		this.validateNetworkInfo(json.beatozNetworks.testnet, "testnet")
 		this.validateNetworkInfo(json.beatozNetworks.devnet, "devnet")
 
-		return new BeatozFacadeConfig(json.beatozNetworks as BeatozNetworkInfo, json.contractJsonDir)
+		return new BeatozWrapConfig(json.beatozNetworks as BeatozNetworkInfo, json.contractJsonDir)
 	}
 
 	private static validateNetworkInfo(networkInfo: any, networkName: string): void {
