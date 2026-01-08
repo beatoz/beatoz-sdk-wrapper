@@ -6,8 +6,9 @@ import {
   BeatozConverter,
   BeatozEvmEventService,
   ContractJsonReader,
+  BeatozContractDeployer,
+  ContractJson
 } from "../sdk-wrap";
-import { BeatozContractDeployer } from "../sdk-wrap/beatoz-contract-deployer";
 import { PostMessage } from "./type/issue-stablecoin";
 
 export class TokenBTIP10Client extends BeatozContract {
@@ -31,10 +32,10 @@ export class TokenBTIP10Client extends BeatozContract {
     return new TokenBTIP10Client(btzWeb3, contractAddress, btip10TokenContractJson, linkerEndpointContractJson)
   }
 
-  constructor(btzWeb3: BeatozChain, contractAddress: string, contractJson: any, linkerEndpointContractJson: any) {
+  constructor(btzWeb3: BeatozChain, contractAddress: string, contractJson: any, linkerEndpointContractJson: ContractJson) {
     super(btzWeb3, contractAddress, contractJson)
 
-    const linkerEndpointContractInterface = new Interface(linkerEndpointContractJson.abi)
+    const linkerEndpointContractInterface = new Interface(linkerEndpointContractJson.abi())
     const eventFragment = linkerEndpointContractInterface.getEvent("PostMessage")
     if (eventFragment == null) return
     this.postMessageEventFragment = eventFragment

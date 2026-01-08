@@ -4,8 +4,8 @@ import {
   BeatozContract,
   BeatozConverter,
   BeatozEvmEventService, ContractJsonReader,
+  BeatozContractDeployer
 } from "../sdk-wrap";
-import { BeatozContractDeployer } from "../sdk-wrap/beatoz-contract-deployer";
 import { IssueStablecoin } from "./type/issue-stablecoin";
 import { StablecoinInfo } from "./type/stablecoin-info";
 
