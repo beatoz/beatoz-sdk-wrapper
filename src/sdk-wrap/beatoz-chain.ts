@@ -4,6 +4,7 @@ import { Web3 } from "@beatoz/web3"
 import { Web3Account } from "@beatoz/web3-accounts"
 import { BeatozConverter } from "./beatoz-converter"
 import {BeatozAccount} from "./beatoz-account";
+import {BeatozAddress} from "./beatoz-address";
 
 export class BeatozChain {
 	readonly web3: Web3
@@ -42,6 +43,10 @@ export class BeatozChain {
 		const account = this.web3.beatoz.accounts.privateKeyToAccount(privateKey)
 		return new BeatozAccount(this, account)
 	}
+
+    getBeatozAddress(address: string) {
+      return new BeatozAddress(this, address)
+    }
 
 	async getGasPrice() {
 		const rule = (await this.web3.beatoz.rule()) as any

@@ -6,32 +6,29 @@ import { Web3 } from "@beatoz/web3"
 import { BeatozNetworkType } from "./constant"
 import { ContractJsonReader } from "./contract-json-reader"
 import { Provider } from "./provider"
-import { BeatozFacadeConfigReader } from "./config/beatoz-facade-config.reader"
-import { BeatozFacadeConfig } from "./config/beatoz-facade.config"
+import { BeatozWrapConfigReader } from "./config/beatoz-wrap-config.reader"
+import { BeatozWrapConfig } from "./config/beatoz-wrap.config"
 import {BeatozChain} from "./beatoz-chain";
+import {BeatozContractDeployer} from "./beatoz-contract-deployer";
 
-export class BeatozChainFactory {
+export class BeatozFactory {
 	readonly configFilePath: string
-	readonly btzFacadeConfig: BeatozFacadeConfig
-
-	// constructor(configDirPath: string) {
-	// 	this.configDirPath = configDirPath
-	// 	this.btzFacadeConfig = BeatozFacadeConfigReader.loadDefault(configDirPath)
-	// }
+	readonly btzFacadeConfig: BeatozWrapConfig
 
 	constructor(configFilePath: string) {
 		this.configFilePath = configFilePath
-		this.btzFacadeConfig = BeatozFacadeConfigReader.fromFile(configFilePath)
+		this.btzFacadeConfig = BeatozWrapConfigReader.fromFile(configFilePath)
 	}
 
 	async createBeatozProvider(networkType: BeatozNetworkType) {
-		const btzFacade = await this.createBtzFacade(networkType)
-		const jsonReader = this.createContractJsonReader()
+        const beatozChain = await this.createBeatozChain(networkType)
+        const jsonReader = this.createContractJsonReader()
+        const contractDeployer = new BeatozContractDeployer(beatozChain, jsonReader)
 
-		return new Provider(btzFacade, jsonReader)
+		return new Provider(beatozChain, jsonReader, contractDeployer)
 	}
 
-	async createBtzFacade(netType: BeatozNetworkType): Promise<BeatozChain> {
+	async createBeatozChain(netType: BeatozNetworkType): Promise<BeatozChain> {
 		try {
 			const web3 = this.createWeb3(netType)
 			return await BeatozChain.create(web3)
@@ -66,8 +63,14 @@ export class BeatozChainFactory {
 		return networkData[networkType]
 	}
 
+    async createBeatozContractDeployer(beatozChain: BeatozChain) {
+      const jsonReader = this.createContractJsonReader()
+      return new BeatozContractDeployer(beatozChain, jsonReader)
+    }
+
 	// private getBtzNetworkUrl(networkType: BeatozNetworkType) {
 	// 	const beatozNetworkConfig = BeatozNetworkConfig.loadDefault(this.configDirPath)
 	// 	return beatozNetworkConfig.getNetworkUrl(networkType)
 	// }
 }
+

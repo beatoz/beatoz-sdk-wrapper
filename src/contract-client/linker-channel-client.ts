@@ -1,10 +1,18 @@
-import {ContractJsonReader} from "../sdk-wrap/contract-json-reader";
-import {BeatozContract} from "../sdk-wrap/beatoz-contract";
-import {BeatozChain} from "../sdk-wrap/beatoz-chain";
-import {BeatozAccount} from "../sdk-wrap/beatoz-account";
+import {
+  BeatozAccount,
+  BeatozChain,
+  BeatozContract,
+  ContractJsonReader,
+} from "../sdk-wrap";
+import { BeatozContractDeployer } from "../sdk-wrap/beatoz-contract-deployer";
 
 export class LinkerChannelClient extends BeatozContract {
   static CONTRACT_NAME = "LinkerChannel"
+
+  static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount, dAppContractAddress: string, dAppOwnerAddress: string) {
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [dAppContractAddress, dAppOwnerAddress])
+    return contractAddress
+  }
 
   static create(btzWeb3: BeatozChain, contractJsonReader: ContractJsonReader, contractAddress: string) {
     const linkerChannelContractJson = contractJsonReader.readContractJson(this.CONTRACT_NAME)

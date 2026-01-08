@@ -4,13 +4,13 @@ import {
   BeatozContract,
   BeatozConverter,
   BeatozEvmEventService, ContractJsonReader,
+  BeatozContractDeployer
 } from "../sdk-wrap";
-import { BeatozContractDeployer } from "../sdk-wrap/beatoz-contract-deployer";
 import { IssueStablecoin } from "./type/issue-stablecoin";
 import { StablecoinInfo } from "./type/stablecoin-info";
 
-export class StablecoinIssuanceClient extends BeatozContract {
-	static CONTRACT_NAME = "StablecoinIssuance"
+export class StablecoinIssuanceClientV2 extends BeatozContract {
+	static CONTRACT_NAME = "StablecoinIssuanceV2"
 	readonly evmEventService = new BeatozEvmEventService(this.contractInterface, this.contractAddress)
 	readonly btzConverter = new BeatozConverter(this.btz)
 
@@ -21,7 +21,7 @@ export class StablecoinIssuanceClient extends BeatozContract {
 
   static create(btzWeb3: BeatozChain, contractJsonReader: ContractJsonReader, contractAddress: string) {
     const contractJson = contractJsonReader.readContractJson(this.CONTRACT_NAME)
-    return new StablecoinIssuanceClient(btzWeb3, contractAddress, contractJson)
+    return new StablecoinIssuanceClientV2(btzWeb3, contractAddress, contractJson)
   }
 
 	async getContractBalance(): Promise<bigint> {
@@ -46,7 +46,7 @@ export class StablecoinIssuanceClient extends BeatozContract {
 
 	async depositCollateral(issuerAccount: BeatozAccount, depositAmount: string) {
 		const methodAbi = this.contract.methods.depositCollateral().encodeABI()
-		const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, depositAmount, methodAbi, 3000000)
+		const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, depositAmount, methodAbi, 5000000)
 		const txResult = await this.sendSignedTransaction(signedTx)
 		if (txResult.isFailed) {
 			throw new Error("Transaction failed")

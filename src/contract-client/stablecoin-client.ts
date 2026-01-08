@@ -1,12 +1,17 @@
 /** @format */
 
-import { BeatozConverter } from "../sdk-wrap/beatoz-converter"
-import {BeatozContract} from "../sdk-wrap/beatoz-contract";
-import {BeatozAccount} from "../sdk-wrap/beatoz-account";
+import { BeatozAccount, BeatozContract, BeatozConverter } from "../sdk-wrap";
+import { BeatozContractDeployer } from "../sdk-wrap/beatoz-contract-deployer";
 
 export class StableCoinClient extends BeatozContract {
 	static CONTRACT_NAME = "BeatozStablecoin"
 	readonly converter: BeatozConverter = this.btz.beatozConverter()
+
+    static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount, tokenName: string, tokenSymbol: string, decimal: number) {
+      const args = [tokenName, tokenSymbol, decimal.toString()]
+      const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, args)
+      return contractAddress
+    }
 
 	async totalSupply() {
 		const result = await this.contract.methods.totalSupply().call()
