@@ -2,14 +2,15 @@ import {
   BeatozAccount,
   BeatozChain,
   ContractJsonReader,
+  BeatozContractDeployer
 } from "../sdk-wrap";
-import { BeatozContractDeployer } from "../sdk-wrap/beatoz-contract-deployer";
 import {TokenBTIP10Client} from "./token-btip10-client";
 
 export class Btip10StablecoinClient extends TokenBTIP10Client {
   static CONTRACT_NAME = "BTIP10Stablecoin"
 
   static async deploy2(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount, tokenName: string, tokenSymbol: string, owner: string) {
+    console.log("deploy2")
     const contractAddress = await contractDeployer.deploy(Btip10StablecoinClient.CONTRACT_NAME, deployAccount, [tokenName, tokenSymbol, owner])
     return contractAddress
   }

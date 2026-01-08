@@ -21,12 +21,16 @@ export class BeatozContractDeployer {
 
     async deploy(contractName: string, deployAccount: BeatozAccount, args: any[], gas: number = 20000000) {
       const contractJson = this.contractJsonReader.readContractJson(contractName)
+      console.log("deloy contractName: " + contractName + " args: " + args + " gas: " + gas + " deployAccount: " + deployAccount.address)
       return this.doDeploy(contractJson, args, deployAccount, gas)
     }
 
     private async doDeploy(contractJson: ContractJson, args: any[], deployAccount: BeatozAccount, gas: number) {
+      console.log("doDeploy start")
       const contract = new this.beatozChain.web3.beatoz.Contract(contractJson.abi())
+      console.log("doDeploy contraft abi")
       const bytecode = contractJson.bytecode()
+      console.log("doDeploy bytecode")
       const txResponse = await contract.deploy(
           bytecode,
           args,
@@ -35,8 +39,11 @@ export class BeatozContractDeployer {
           gas,
       ).send();
 
+      console.log("doDeploy deoloy")
+
       const beatozTxResult = BeatozTxResult.fromTxCommitResponse(txResponse)
       if (beatozTxResult.isFailed) {
+        console.log("doDeploy tx failed")
         return ""
       }
 
