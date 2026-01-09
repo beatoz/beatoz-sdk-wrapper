@@ -1,3 +1,3 @@
 /** @format */
 
-export type BeatozNetworkType = "mainnet | testnet" | "devnet"
+export type BeatozNetworkType = 'mainnet | testnet' | 'devnet';
