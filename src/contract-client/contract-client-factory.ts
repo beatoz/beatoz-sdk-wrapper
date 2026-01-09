@@ -1,21 +1,21 @@
 /** @format */
-import { BeatozChain, ContractJsonReader } from "../sdk-wrap";
-import { StableCoinClient } from "./stablecoin-client";
-import { StablecoinIssuanceClient } from "./stablecoin-issuance-client";
+import { BeatozChain, ContractJsonReader } from '../sdk-wrap';
+import { StableCoinClient } from './stablecoin-client';
+import { StablecoinIssuanceClient } from './stablecoin-issuance-client';
 
 export class ContractClientFactory {
-	constructor(
-		private readonly btzFacade: BeatozChain,
-		readonly jsonReader: ContractJsonReader
-	) {}
+  constructor(
+    private readonly btzFacade: BeatozChain,
+    readonly jsonReader: ContractJsonReader
+  ) {}
 
-	createStablecoinIssuanceClient(contractAddress: string) {
-		const contractJson = this.jsonReader.readContractJson(StablecoinIssuanceClient.CONTRACT_NAME)
-		return new StablecoinIssuanceClient(this.btzFacade, contractAddress, contractJson)
-	}
+  createStablecoinIssuanceClient(contractAddress: string) {
+    const contractJson = this.jsonReader.readContractJson(StablecoinIssuanceClient.CONTRACT_NAME);
+    return new StablecoinIssuanceClient(this.btzFacade, contractAddress, contractJson);
+  }
 
-	createErc20Client(contractAddress: string) {
-		const erc20ContractJson = this.jsonReader.readContractJson(StableCoinClient.CONTRACT_NAME)
-		return new StableCoinClient(this.btzFacade, contractAddress, erc20ContractJson)
-	}
+  createErc20Client(contractAddress: string) {
+    const erc20ContractJson = this.jsonReader.readContractJson(StableCoinClient.CONTRACT_NAME);
+    return new StableCoinClient(this.btzFacade, contractAddress, erc20ContractJson);
+  }
 }

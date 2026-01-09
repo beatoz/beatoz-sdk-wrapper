@@ -1,28 +1,22 @@
-import {
-  BeatozAccount,
-  BeatozChain,
-  BeatozContract,
-  ContractJsonReader,
-} from "../sdk-wrap";
-import { BeatozContractDeployer } from "../sdk-wrap/beatoz-contract-deployer";
+import { BeatozAccount, BeatozChain, BeatozContract, ContractJsonReader } from '../sdk-wrap';
+import { BeatozContractDeployer } from '../sdk-wrap/beatoz-contract-deployer';
 
 export class LinkerEndpointClient extends BeatozContract {
-  static CONTRACT_NAME = "LinkerEndpoint"
+  static CONTRACT_NAME = 'LinkerEndpoint';
 
   static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount) {
-    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [])
-    return contractAddress
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, []);
+    return contractAddress;
   }
 
   static create(btzWeb3: BeatozChain, contractJsonReader: ContractJsonReader, contractAddress: string) {
-    const contractJson = contractJsonReader.readContractJson(this.CONTRACT_NAME)
-    return new LinkerEndpointClient(btzWeb3, contractAddress, contractJson)
+    const contractJson = contractJsonReader.readContractJson(this.CONTRACT_NAME);
+    return new LinkerEndpointClient(btzWeb3, contractAddress, contractJson);
   }
 
   async linkerChannels(dAppAddress: string) {
-    const result = await this.contract.methods.linkerChannels(dAppAddress).call()
-    const addr = this.btz.beatozConverter().convertAddress(result)
-    return addr
+    const result = await this.contract.methods.linkerChannels(dAppAddress).call();
+    const addr = this.btz.beatozConverter().convertAddress(result);
+    return addr;
   }
 }
-
