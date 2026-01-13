@@ -1,5 +1,4 @@
-import { BeatozAccount, BeatozChain, BeatozContract, ContractJsonReader } from '../sdk-wrap';
-import { BeatozContractDeployer } from '../sdk-wrap/beatoz-contract-deployer';
+import { BeatozAccount, BeatozChain, BeatozContract, ContractJsonReader, BeatozContractDeployer } from '../sdk-wrap';
 
 export class LinkerChannelClient extends BeatozContract {
   static CONTRACT_NAME = 'LinkerChannel';
@@ -24,7 +23,7 @@ export class LinkerChannelClient extends BeatozContract {
     if (result.value.vmErr !== undefined) {
       return BigInt(0);
     }
-    return this.btz.beatozConverter().convertUint256(result);
+    return this.beatozChain.beatozConverter().convertUint256(result);
   }
 
   async addDAppChannel(ownerAccount: BeatozAccount, toChainId: string, toDAppContractAddress: string) {
@@ -44,7 +43,7 @@ export class LinkerChannelClient extends BeatozContract {
     if (response.value.vmErr !== undefined) {
       return BigInt(0);
     }
-    return this.btz.beatozConverter().convertUint256(response);
+    return this.beatozChain.beatozConverter().convertUint256(response);
   }
 
   async inboundMidxs(dAppChannelId: string, local: string, remote: string) {
@@ -52,6 +51,6 @@ export class LinkerChannelClient extends BeatozContract {
     if (response.value.vmErr !== undefined) {
       return BigInt(0);
     }
-    return this.btz.beatozConverter().convertUint256(response);
+    return this.beatozChain.beatozConverter().convertUint256(response);
   }
 }

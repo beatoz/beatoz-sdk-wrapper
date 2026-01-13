@@ -10,7 +10,7 @@ import {
 
 export class TokenErc20Client extends BeatozContract {
   static CONTRACT_NAME = 'TokenERC20';
-  readonly converter: BeatozConverter = this.btz.beatozConverter();
+  readonly converter: BeatozConverter = this.beatozChain.beatozConverter();
   readonly evmEventService = new BeatozEvmEventService(this.contractInterface, this.contractAddress);
 
   static async deploy(

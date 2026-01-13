@@ -13,7 +13,7 @@ import { PostMessage } from './type/issue-stablecoin';
 
 export class TokenBTIP10Client extends BeatozContract {
   static CONTRACT_NAME = 'TokenBTIP10';
-  readonly converter: BeatozConverter = this.btz.beatozConverter();
+  readonly converter: BeatozConverter = this.beatozChain.beatozConverter();
   readonly evmEventService = new BeatozEvmEventService(this.contractInterface, this.contractAddress);
   linkerEndpointEventService: BeatozEvmEventService | undefined;
 
@@ -125,7 +125,7 @@ export class TokenBTIP10Client extends BeatozContract {
     //const { rawTransaction } = account.signTransaction(contractTrxProto, this.btz.chainId)
 
     // broadcast raw transaction
-    const result = await this.btz.web3.beatoz.broadcastRawTxCommit(rawTransaction);
+    const result = await this.beatozChain.web3.beatoz.broadcastRawTxCommit(rawTransaction);
     console.log('--------------------------');
     console.log(result);
   }

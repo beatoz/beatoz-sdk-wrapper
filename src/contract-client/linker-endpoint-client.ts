@@ -1,5 +1,4 @@
-import { BeatozAccount, BeatozChain, BeatozContract, ContractJsonReader } from '../sdk-wrap';
-import { BeatozContractDeployer } from '../sdk-wrap/beatoz-contract-deployer';
+import { BeatozAccount, BeatozChain, BeatozContract, ContractJsonReader, BeatozContractDeployer } from '../sdk-wrap';
 
 export class LinkerEndpointClient extends BeatozContract {
   static CONTRACT_NAME = 'LinkerEndpoint';
@@ -16,7 +15,7 @@ export class LinkerEndpointClient extends BeatozContract {
 
   async linkerChannels(dAppAddress: string) {
     const result = await this.contract.methods.linkerChannels(dAppAddress).call();
-    const addr = this.btz.beatozConverter().convertAddress(result);
+    const addr = this.beatozChain.beatozConverter().convertAddress(result);
     return addr;
   }
 }

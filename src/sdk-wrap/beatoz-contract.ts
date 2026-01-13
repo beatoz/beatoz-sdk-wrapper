@@ -8,21 +8,29 @@ import { BeatozAccount } from './beatoz-account';
 import { ContractJson } from './contract-json';
 
 export class BeatozContract {
-  readonly btz: BeatozChain;
+  readonly beatozChain: BeatozChain;
   readonly contractAddress: string;
-  readonly contractInterface: Interface;
-  readonly contract: any;
-  readonly converter: BeatozConverter;
+  protected readonly contractInterface: Interface;
+  protected readonly contract: any;
+  protected readonly converter: BeatozConverter;
 
-  constructor(btzWeb3: BeatozChain, contractAddress: string, contractJson: ContractJson) {
+  constructor(beatozChain: BeatozChain, contractAddress: string, contractJson: ContractJson) {
     if (contractAddress == undefined || contractAddress == '') {
       throw new Error('contractAddress is undefined');
     }
-    this.btz = btzWeb3;
+    this.beatozChain = beatozChain;
     this.contractAddress = contractAddress;
     this.contractInterface = new Interface(contractJson.abi());
-    this.contract = new this.btz.web3.beatoz.Contract(contractJson.abi(), contractAddress);
-    this.converter = this.btz.beatozConverter();
+    this.contract = new this.beatozChain.web3.beatoz.Contract(contractJson.abi(), contractAddress);
+    this.converter = this.beatozChain.beatozConverter();
+  }
+
+  get chainType() {
+    return this.beatozChain.chainType;
+  }
+
+  get chainId() {
+    return this.beatozChain.chainId;
   }
 
   async buildContractTransaction(from: BeatozAccount, to: string, amount: string, methodAbi: string, gas: number) {
@@ -34,7 +42,7 @@ export class BeatozContract {
       payload: { data: methodAbi },
       //gas: Number(rule.value.maxTrxGas),
       gas: gas,
-      gasPrice: await this.btz.getGasPrice(),
+      gasPrice: await this.beatozChain.getGasPrice(),
       //type: 6,
     });
   }
@@ -46,7 +54,7 @@ export class BeatozContract {
   }
 
   async sendSignedTransaction(signedTransaction: string) {
-    const broadcastTxResult = await this.btz.web3.beatoz.broadcastRawTxCommit(signedTransaction);
+    const broadcastTxResult = await this.beatozChain.web3.beatoz.broadcastRawTxCommit(signedTransaction);
     return BeatozTxResult.fromTxCommitResponse(broadcastTxResult);
   }
 }

@@ -14,7 +14,7 @@ import { StablecoinInfo } from './type/stablecoin-info';
 export class StablecoinIssuanceClientV2 extends BeatozContract {
   static CONTRACT_NAME = 'StablecoinIssuanceV2';
   readonly evmEventService = new BeatozEvmEventService(this.contractInterface, this.contractAddress);
-  readonly btzConverter = new BeatozConverter(this.btz);
+  readonly btzConverter = new BeatozConverter(this.beatozChain);
 
   static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount) {
     const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, []);
@@ -87,8 +87,8 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
     }
 
     return new StablecoinInfo(
-      this.btz.chainType,
-      this.btz.chainId,
+      this.beatozChain.chainType,
+      this.beatozChain.chainId,
       issueStablecoinEvent.deployedStablecoinAddress,
       issueStablecoinEvent.mintedAmount
     );
@@ -118,8 +118,8 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
     }
 
     return new StablecoinInfo(
-      this.btz.chainType,
-      this.btz.chainId,
+      this.beatozChain.chainType,
+      this.beatozChain.chainId,
       issueStablecoinEvent.deployedStablecoinAddress,
       issueStablecoinEvent.mintedAmount
     );

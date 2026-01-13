@@ -21,4 +21,4 @@ export * from './contract-json';
 export * from './config/beatoz-wrap.config';
 export * from './config/beatoz-wrap-config.reader';
 
-export * from './provider';
+export * from './beatoz-provider';

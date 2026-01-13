@@ -5,7 +5,7 @@ import path from 'path';
 import { Web3 } from '@beatoz/web3';
 import { BeatozNetworkType } from './constant';
 import { ContractJsonReader } from './contract-json-reader';
-import { Provider } from './provider';
+import { BeatozProvider } from './beatoz-provider';
 import { BeatozWrapConfigReader } from './config/beatoz-wrap-config.reader';
 import { BeatozWrapConfig } from './config/beatoz-wrap.config';
 import { BeatozChain } from './beatoz-chain';
@@ -25,7 +25,7 @@ export class BeatozFactory {
     const jsonReader = this.createContractJsonReader();
     const contractDeployer = new BeatozContractDeployer(beatozChain, jsonReader);
 
-    return new Provider(beatozChain, jsonReader, contractDeployer);
+    return new BeatozProvider(beatozChain, jsonReader, contractDeployer);
   }
 
   async createBeatozChain(netType: BeatozNetworkType): Promise<BeatozChain> {
