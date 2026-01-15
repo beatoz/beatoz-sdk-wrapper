@@ -11,7 +11,6 @@ export class Btip10StablecoinClient extends TokenBTIP10Client {
     tokenSymbol: string,
     owner: string
   ) {
-    console.log('deploy2');
     const contractAddress = await contractDeployer.deploy(Btip10StablecoinClient.CONTRACT_NAME, deployAccount, [
       tokenName,
       tokenSymbol,

@@ -14,6 +14,10 @@ export class ErrorInfo {
     readonly log: string,
     readonly message: string
   ) {}
+
+  toString(): string {
+    return `type: ${this.errorType}, code: ${this.code}, log: ${this.log}, message: ${this.message}`;
+  }
 }
 
 export class BeatozTxResult {

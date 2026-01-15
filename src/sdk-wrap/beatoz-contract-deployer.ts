@@ -27,8 +27,8 @@ export class BeatozContractDeployer {
 
     const beatozTxResult = BeatozTxResult.fromTxCommitResponse(txResponse);
     if (beatozTxResult.isFailed) {
-      console.log('doDeploy failed');
-      return '';
+      console.log(`contract deploy failed: ${beatozTxResult.errorInfo?.toString()}`);
+      throw new Error(`contract deploy failed: ${beatozTxResult.errorInfo?.toString()}`);
     }
 
     const contractAddress = beatozTxResult.returnData;
