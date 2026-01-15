@@ -7,7 +7,7 @@ import {
   BeatozEvmEventService,
   ContractJsonReader,
   BeatozContractDeployer,
-  ContractJson,
+  ContractJson, DEFAULT_GAS,
 } from '../sdk-wrap';
 import { PostMessage } from './type/issue-stablecoin';
 
@@ -20,12 +20,9 @@ export class TokenBTIP10Client extends BeatozContract {
   readonly postMessageHash: string = '';
   readonly postMessageEventFragment: any = undefined;
 
-  static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount, tokenName: string, tokenSymbol: string) {
-    const contractAddress = await contractDeployer.deploy(TokenBTIP10Client.CONTRACT_NAME, deployAccount, [
-      tokenName,
-      tokenSymbol,
-      deployAccount.address,
-    ]);
+  static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount, tokenName: string, tokenSymbol: string, gas: number = DEFAULT_GAS) {
+    const tokenOwner = deployAccount.address;
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [tokenName, tokenSymbol, tokenOwner], gas);
     return contractAddress;
   }
 

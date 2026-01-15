@@ -1,6 +1,6 @@
 /** @format */
 
-import { BeatozAccount, BeatozContract, BeatozConverter, BeatozContractDeployer } from '../sdk-wrap';
+import {BeatozAccount, BeatozContract, BeatozConverter, BeatozContractDeployer, DEFAULT_GAS} from '../sdk-wrap';
 
 export class StableCoinClient extends BeatozContract {
   static CONTRACT_NAME = 'BeatozStablecoin';
@@ -11,10 +11,11 @@ export class StableCoinClient extends BeatozContract {
     deployAccount: BeatozAccount,
     tokenName: string,
     tokenSymbol: string,
-    decimal: number
+    decimal: number,
+    gas: number = DEFAULT_GAS
   ) {
     const args = [tokenName, tokenSymbol, decimal.toString()];
-    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, args);
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, args, gas);
     return contractAddress;
   }
 

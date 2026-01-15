@@ -6,7 +6,7 @@ import {
   BeatozConverter,
   BeatozEvmEventService,
   ContractJsonReader,
-  BeatozContractDeployer,
+  BeatozContractDeployer, DEFAULT_GAS,
 } from '../sdk-wrap';
 import { IssueStablecoin } from './type/issue-stablecoin';
 import { StablecoinInfo } from './type/stablecoin-info';
@@ -16,8 +16,8 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
   readonly evmEventService = new BeatozEvmEventService(this.contractInterface, this.contractAddress);
   readonly btzConverter = new BeatozConverter(this.beatozChain);
 
-  static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount) {
-    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, []);
+  static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount, gas: number = DEFAULT_GAS) {
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [], gas);
     return contractAddress;
   }
 

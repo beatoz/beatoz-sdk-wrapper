@@ -1,4 +1,4 @@
-import { BeatozAccount, BeatozChain, BeatozContract, ContractJsonReader, BeatozContractDeployer } from '../sdk-wrap';
+import {BeatozAccount, BeatozChain, BeatozContract, ContractJsonReader, BeatozContractDeployer, DEFAULT_GAS} from '../sdk-wrap';
 
 export class LinkerChannelClient extends BeatozContract {
   static CONTRACT_NAME = 'LinkerChannel';
@@ -7,9 +7,10 @@ export class LinkerChannelClient extends BeatozContract {
     contractDeployer: BeatozContractDeployer,
     deployAccount: BeatozAccount,
     dAppContractAddress: string,
-    dAppOwnerAddress: string
+    dAppOwnerAddress: string,
+    gas: number = DEFAULT_GAS
   ) {
-    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [dAppContractAddress, dAppOwnerAddress]);
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [dAppContractAddress, dAppOwnerAddress], gas);
     return contractAddress;
   }
 

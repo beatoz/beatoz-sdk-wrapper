@@ -5,7 +5,7 @@ import {
   BeatozConverter,
   BeatozEvmEventService,
   ContractJsonReader,
-  BeatozContractDeployer,
+  BeatozContractDeployer, DEFAULT_GAS,
 } from '../sdk-wrap';
 
 export class TokenErc20Client extends BeatozContract {
@@ -18,9 +18,10 @@ export class TokenErc20Client extends BeatozContract {
     deployAccount: BeatozAccount,
     tokenName: string,
     tokenSymbol: string,
-    initSupply: string
+    initSupply: string,
+    gas: number = DEFAULT_GAS
   ) {
-    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [tokenName, tokenSymbol, initSupply]);
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [tokenName, tokenSymbol, initSupply], gas);
     return contractAddress;
   }
 
