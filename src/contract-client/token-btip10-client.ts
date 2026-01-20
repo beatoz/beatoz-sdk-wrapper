@@ -2,19 +2,16 @@ import { Interface } from 'ethers';
 import {
   BeatozAccount,
   BeatozChain,
-  BeatozContract,
-  BeatozConverter,
   BeatozEvmEventService,
   ContractJsonReader,
   BeatozContractDeployer,
   ContractJson, DEFAULT_GAS,
 } from '../sdk-wrap';
 import { PostMessage } from './type/issue-stablecoin';
+import {BaseErc20Client} from "./base-erc20-client";
 
-export class TokenBTIP10Client extends BeatozContract {
+export class TokenBTIP10Client extends BaseErc20Client {
   static CONTRACT_NAME = 'TokenBTIP10';
-  readonly converter: BeatozConverter = this.beatozChain.beatozConverter();
-  readonly evmEventService = new BeatozEvmEventService(this.contractInterface, this.contractAddress);
   linkerEndpointEventService: BeatozEvmEventService | undefined;
 
   readonly postMessageHash: string = '';
@@ -33,8 +30,8 @@ export class TokenBTIP10Client extends BeatozContract {
     return new TokenBTIP10Client(btzWeb3, contractAddress, btip10TokenContractJson, linkerEndpointContractJson);
   }
 
-  constructor(btzWeb3: BeatozChain, contractAddress: string, contractJson: any, linkerEndpointContractJson: ContractJson) {
-    super(btzWeb3, contractAddress, contractJson);
+  constructor(btzWeb3: BeatozChain, contractAddress: string, btip10TokenContractJson: ContractJson, linkerEndpointContractJson: ContractJson) {
+    super(btzWeb3, contractAddress, btip10TokenContractJson);
 
     const linkerEndpointContractInterface = new Interface(linkerEndpointContractJson.abi());
     const eventFragment = linkerEndpointContractInterface.getEvent('PostMessage');
@@ -85,45 +82,5 @@ export class TokenBTIP10Client extends BeatozContract {
   async getChainId() {
     const response = await this.contract.methods.getChainId().call();
     return this.converter.convertUint256(response);
-  }
-
-  async totalSupply() {
-    const response = await this.contract.methods.totalSupply().call();
-    return this.converter.convertUint256(response);
-  }
-
-  async balanceOf(address: string) {
-    const result = await this.contract.methods.balanceOf(address).call();
-    return this.converter.convertUint256(result);
-  }
-
-  async name() {
-    const result = await this.contract.methods.name().call();
-    return this.converter.convertString(result);
-    //return this.convertString(result)
-  }
-
-  async symbol() {
-    const result = await this.contract.methods.symbol().call();
-    return this.converter.convertString(result);
-    //return this.convertString(result)
-  }
-
-  async decimals() {
-    const result = await this.contract.methods.decimals().call();
-    return this.converter.convertString(result);
-  }
-
-  async transfer(fromAccount: BeatozAccount, toAddress: string, amount: string) {
-    const methodAbi = await this.contract.methods.transfer(toAddress, amount).encodeABI();
-    const contractTrxProto = await this.buildContractTransaction(fromAccount, this.contractAddress, '0', methodAbi, 13000000);
-
-    const { rawTransaction } = fromAccount.signTransaction(contractTrxProto);
-    //const { rawTransaction } = account.signTransaction(contractTrxProto, this.btz.chainId)
-
-    // broadcast raw transaction
-    const result = await this.beatozChain.web3.beatoz.broadcastRawTxCommit(rawTransaction);
-    console.log('--------------------------');
-    console.log(result);
   }
 }

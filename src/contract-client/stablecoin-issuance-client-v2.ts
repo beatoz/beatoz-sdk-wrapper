@@ -46,7 +46,7 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
     return this.btzConverter.convertUint256(result);
   }
 
-  async depositCollateral(issuerAccount: BeatozAccount, depositAmount: string) {
+  async depositCollateral(issuerAccount: BeatozAccount, depositAmount: string){
     const methodAbi = this.contract.methods.depositCollateral().encodeABI();
     const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, depositAmount, methodAbi, 5000000);
     const txResult = await this.sendSignedTransaction(signedTx);
@@ -54,6 +54,16 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
       throw new Error('Transaction failed');
     }
   }
+
+  async depositTokenCollateral(collateralTokenContract: string, issuerAccount: BeatozAccount, depositAmount: string) {
+    const methodAbi = this.contract.methods.depositTokenCollateral(collateralTokenContract, depositAmount).encodeABI();
+    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, "0", methodAbi, DEFAULT_GAS);
+    const txResult = await this.sendSignedTransaction(signedTx);
+    if (txResult.isFailed) {
+      throw new Error('Transaction failed');
+    }
+  }
+
   async depositAndMintStablecoin(fromAccount: BeatozAccount, stableCoinContractAddress: string, mintAmount: string) {
     const methodAbi = this.contract.methods.mintAdditionalStablecoin(stableCoinContractAddress).encodeABI();
     const signedTx = await this.buildSignedTransaction(fromAccount, this.contractAddress, mintAmount, methodAbi, 3000000);
