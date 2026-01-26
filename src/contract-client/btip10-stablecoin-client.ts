@@ -12,11 +12,12 @@ export class Btip10StablecoinClient extends TokenBTIP10Client {
     owner: string,
     gas: number = DEFAULT_GAS
   ) {
-    const contractAddress = await contractDeployer.deploy(Btip10StablecoinClient.CONTRACT_NAME, deployAccount, [
-      tokenName,
-      tokenSymbol,
-      owner,
-    ]);
+    const contractAddress = await contractDeployer.deploy(
+        this.CONTRACT_NAME,
+        deployAccount,
+        [tokenName, tokenSymbol, owner],
+        gas
+    );
     return contractAddress;
   }
 
