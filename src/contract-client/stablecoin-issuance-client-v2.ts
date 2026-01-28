@@ -46,43 +46,48 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
     return this.btzConverter.convertUint256(result);
   }
 
-  async depositCollateral(issuerAccount: BeatozAccount, depositAmount: string){
+  async depositCollateral(issuerAccount: BeatozAccount, depositAmount: string, gas: number = DEFAULT_GAS){
     const methodAbi = this.contract.methods.depositCollateral().encodeABI();
-    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, depositAmount, methodAbi, 5000000);
+    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, depositAmount, methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
     if (txResult.isFailed) {
-      throw new Error('Transaction failed');
+      throw new Error(txResult.errorInfo?.toString() ?? 'Transaction failed');
     }
   }
 
-  async depositTokenCollateral(collateralTokenContract: string, issuerAccount: BeatozAccount, depositAmount: string) {
+  async depositTokenCollateral(collateralTokenContract: string, issuerAccount: BeatozAccount, depositAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = this.contract.methods.depositTokenCollateral(collateralTokenContract, depositAmount).encodeABI();
-    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, "0", methodAbi, DEFAULT_GAS);
+    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, "0", methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
     if (txResult.isFailed) {
-      throw new Error('Transaction failed');
+      throw new Error(txResult.errorInfo?.toString() ?? 'Transaction failed');
     }
   }
 
-  async depositAndMintStablecoin(fromAccount: BeatozAccount, stableCoinContractAddress: string, mintAmount: string) {
+  async depositAndMintStablecoin(fromAccount: BeatozAccount, stableCoinContractAddress: string, mintAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = this.contract.methods.mintAdditionalStablecoin(stableCoinContractAddress).encodeABI();
-    const signedTx = await this.buildSignedTransaction(fromAccount, this.contractAddress, mintAmount, methodAbi, 3000000);
+    const signedTx = await this.buildSignedTransaction(fromAccount, this.contractAddress, mintAmount, methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
+    if (txResult.isFailed) {
+      throw new Error(txResult.errorInfo?.toString() ?? 'Transaction failed');
+    }
 
     return txResult.isSuccess;
   }
 
-  async mintStablecoin(issuerAccount: BeatozAccount, stableCoinContractAddress: string, mintAmount: string) {
+  async mintStablecoin(issuerAccount: BeatozAccount, stableCoinContractAddress: string, mintAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = this.contract.methods.mintStablecoin(stableCoinContractAddress, mintAmount).encodeABI();
-    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, '0', methodAbi, 3000000);
+    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, '0', methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
-
+    if (txResult.isFailed) {
+      throw new Error(txResult.errorInfo?.toString() ?? 'Transaction failed');
+    }
     return txResult.isSuccess;
   }
 
-  async deployAndMintStablecoin(issuerAccount: BeatozAccount, stablecoinName: string, symbol: string, decimal: number, mintAmount: string) {
+  async deployAndMintStablecoin(issuerAccount: BeatozAccount, stablecoinName: string, symbol: string, decimal: number, mintAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = this.contract.methods.deployAndMintStablecoin(stablecoinName, symbol, decimal, mintAmount).encodeABI();
-    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, '0', methodAbi, 3000000);
+    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, '0', methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
     if (txResult.isFailed) {
       throw new Error('Transaction failed');
