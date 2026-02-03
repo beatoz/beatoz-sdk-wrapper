@@ -1,21 +1,21 @@
 /** @format */
 
-import { BeatozAccount, BeatozContract, BeatozConverter } from '../sdk-wrap';
-import { BeatozContractDeployer } from '../sdk-wrap/beatoz-contract-deployer';
+import {BeatozAccount, BeatozContract, BeatozConverter, BeatozContractDeployer, DEFAULT_GAS} from '../sdk-wrap';
 
 export class StableCoinClient extends BeatozContract {
   static CONTRACT_NAME = 'BeatozStablecoin';
-  readonly converter: BeatozConverter = this.btz.beatozConverter();
+  readonly converter: BeatozConverter = this.beatozChain.beatozConverter();
 
   static async deploy(
     contractDeployer: BeatozContractDeployer,
     deployAccount: BeatozAccount,
     tokenName: string,
     tokenSymbol: string,
-    decimal: number
+    decimal: number,
+    gas: number = DEFAULT_GAS
   ) {
     const args = [tokenName, tokenSymbol, decimal.toString()];
-    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, args);
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, args, gas);
     return contractAddress;
   }
 
@@ -47,7 +47,7 @@ export class StableCoinClient extends BeatozContract {
     //const { rawTransaction } = account.signTransaction(contractTrxProto, this.btz.chainId)
 
     // broadcast raw transaction
-    const result = await this.btz.web3.beatoz.broadcastRawTxCommit(rawTransaction);
+    const result = await this.beatozChain.web3.beatoz.broadcastRawTxCommit(rawTransaction);
     console.log('--------------------------');
     console.log(result);
   }

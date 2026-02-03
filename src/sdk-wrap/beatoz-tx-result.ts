@@ -14,6 +14,10 @@ export class ErrorInfo {
     readonly log: string,
     readonly message: string
   ) {}
+
+  toString(): string {
+    return `type: ${this.errorType}, code: ${this.code}, log: ${this.log}, message: ${this.message}`;
+  }
 }
 
 export class BeatozTxResult {
@@ -62,23 +66,27 @@ export class BeatozTxResult {
         returnData = Buffer.from(data, 'base64').toString('hex');
       }
     } else {
-      if (txCommitResponse.check_tx?.code != 0) {
+      const checkTxCode = txCommitResponse.check_tx?.code;
+      const deliverTxCode = txCommitResponse.deliver_tx?.code;
+
+      if (checkTxCode !== undefined && checkTxCode !== 0) {
         errorInfo = new ErrorInfo(
           TxErrorType.check_tx,
-          txCommitResponse.check_tx!.code,
-          txCommitResponse.check_tx!.log ? txCommitResponse.check_tx!.log : '',
+          checkTxCode,
+          txCommitResponse.check_tx?.log ?? '',
           ''
         );
-      } else if (txCommitResponse.deliver_tx?.code != 0) {
-        const errMsg = this.parseEvmCallError(
-          Buffer.from(txCommitResponse.deliver_tx!.data!, 'base64').toString('hex'),
-          new Web3('https://')
-        );
+      } else if (deliverTxCode !== undefined && deliverTxCode !== 0) {
+        let errMsg: string | null = null;
+        const data = txCommitResponse.deliver_tx?.data;
+        if (data !== undefined && data !== null && data !== '') {
+          errMsg = this.parseEvmCallError(Buffer.from(data, 'base64').toString('hex'), new Web3('https://'));
+        }
         errorInfo = new ErrorInfo(
           TxErrorType.deliver_tx,
-          txCommitResponse.deliver_tx!.code,
-          txCommitResponse.deliver_tx!.log ? txCommitResponse.deliver_tx!.log : '',
-          errMsg ? errMsg : ''
+          deliverTxCode,
+          txCommitResponse.deliver_tx?.log ?? '',
+          errMsg ?? ''
         );
       }
     }

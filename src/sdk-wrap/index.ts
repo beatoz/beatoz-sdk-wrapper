@@ -9,8 +9,8 @@ export * from './beatoz-converter';
 export * from './beatoz-tx-result';
 export * from './beatoz-contract-deployer';
 
-export * from './transactions/beatoz-transfer-tx';
-export * from './transactions/beatoz-contract-tx';
+export * from './transactions';
+export * from './linker-protocol';
 
 // Utilities
 export * from './constant';
@@ -21,4 +21,4 @@ export * from './contract-json';
 export * from './config/beatoz-wrap.config';
 export * from './config/beatoz-wrap-config.reader';
 
-export * from './provider';
+export * from './beatoz-provider';

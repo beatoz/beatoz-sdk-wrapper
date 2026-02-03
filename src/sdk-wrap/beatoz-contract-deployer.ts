@@ -5,18 +5,20 @@ import { BeatozTxResult } from './beatoz-tx-result';
 import { ContractJson } from './contract-json';
 import { setTimeout } from 'timers/promises';
 
+export const DEFAULT_GAS = 2000000; // 10000000
+
 export class BeatozContractDeployer {
   constructor(
     readonly beatozChain: BeatozChain,
     readonly contractJsonReader: ContractJsonReader
   ) {}
 
-  async deploy2(contractJsonFilePath: string, deployAccount: BeatozAccount, args: any[], gas: number = 20000000) {
+  async deploy2(contractJsonFilePath: string, deployAccount: BeatozAccount, args: any[], gas: number = DEFAULT_GAS) {
     const contractJson = ContractJsonReader.readContractJson(contractJsonFilePath);
     return await this.doDeploy(contractJson, args, deployAccount, gas);
   }
 
-  async deploy(contractName: string, deployAccount: BeatozAccount, args: any[], gas: number = 20000000) {
+  async deploy(contractName: string, deployAccount: BeatozAccount, args: any[], gas: number = DEFAULT_GAS) {
     const contractJson = this.contractJsonReader.readContractJson(contractName);
     return await this.doDeploy(contractJson, args, deployAccount, gas);
   }
@@ -27,8 +29,8 @@ export class BeatozContractDeployer {
 
     const beatozTxResult = BeatozTxResult.fromTxCommitResponse(txResponse);
     if (beatozTxResult.isFailed) {
-      console.log('doDeploy failed');
-      return '';
+      console.log(`contract deploy failed: ${beatozTxResult.errorInfo?.toString()}`);
+      throw new Error(`contract deploy failed: ${beatozTxResult.errorInfo?.toString()}`);
     }
 
     const contractAddress = beatozTxResult.returnData;

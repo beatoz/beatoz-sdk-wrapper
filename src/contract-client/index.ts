@@ -1,5 +1,4 @@
 // Contract Clients
-export * from './contract-client-factory';
 export * from './linker-channel-client';
 export * from './linker-endpoint-client';
 export * from './stablecoin-client';

@@ -3,35 +3,45 @@
 import { Web3Account } from '@beatoz/web3-accounts';
 import { TrxProto } from '@beatoz/web3-types/lib/commonjs/trx_proto';
 import { BeatozChain } from './beatoz-chain';
+import {BeatozTransferTx} from "./transactions";
 
 export class BeatozAccount {
-  readonly btz: BeatozChain;
+  readonly beatozChain: BeatozChain;
   readonly account: Web3Account;
 
-  static fromPrivateKey(web3: BeatozChain, privateKey: string) {
-    return web3.getBeatozAccount(privateKey);
+  static newAccount(beatozChain: BeatozChain) {
+    const web3Account = beatozChain.web3.beatoz.accounts.create()
+    return new BeatozAccount(beatozChain, web3Account)
   }
 
-  constructor(web3: BeatozChain, account: Web3Account) {
-    this.btz = web3;
+  static fromPrivateKey(beatozChain: BeatozChain, privateKey: string) {
+    return beatozChain.getBeatozAccount(privateKey);
+  }
+
+  constructor(beatozChain: BeatozChain, account: Web3Account) {
+    this.beatozChain = beatozChain;
     this.account = account;
-  }
-
-  async nonce() {
-    const accountResponse = await this.btz.getAccount(this.account.address);
-    return accountResponse.value.nonce;
-  }
-
-  async balance() {
-    const accountResponse = await this.btz.getAccount(this.account.address);
-    return accountResponse.value.balance;
-  }
-
-  signTransaction(trxProto: TrxProto) {
-    return this.account.signTransaction(trxProto, this.btz.chainId);
   }
 
   get address() {
     return this.account.address;
+  }
+
+  async nonce() {
+    const accountResponse = await this.beatozChain.getAccount(this.account.address);
+    return accountResponse.value.nonce;
+  }
+
+  async balance() {
+    const accountResponse = await this.beatozChain.getAccount(this.account.address);
+    return accountResponse.value.balance;
+  }
+
+  async send(toAddress: string, amount: string) {
+    return await (new BeatozTransferTx(this.beatozChain).transfer(this, toAddress, amount))
+  }
+
+  signTransaction(trxProto: TrxProto) {
+    return this.account.signTransaction(trxProto, this.beatozChain.chainId);
   }
 }

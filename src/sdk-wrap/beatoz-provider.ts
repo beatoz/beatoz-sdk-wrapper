@@ -5,20 +5,12 @@ import { BeatozFactory } from './beatoz-factory';
 import { BeatozChain } from './beatoz-chain';
 import { BeatozContractDeployer } from './beatoz-contract-deployer';
 
-export class Provider {
+export class BeatozProvider {
   constructor(
-    readonly btzChain: BeatozChain,
+    readonly beatozChain: BeatozChain,
     readonly contractJsonReader: ContractJsonReader,
     readonly contractDeployer: BeatozContractDeployer
   ) {}
-
-  getBtzChain() {
-    return this.btzChain;
-  }
-
-  getContractJsonReader() {
-    return this.contractJsonReader;
-  }
 
   static async create(configFileAbsolutePath: string, beatozNetworkType: BeatozNetworkType) {
     return new BeatozFactory(configFileAbsolutePath).createBeatozProvider(beatozNetworkType);
