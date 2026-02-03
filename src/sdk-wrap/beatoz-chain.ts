@@ -62,4 +62,8 @@ export class BeatozChain {
     const accountResponse = await this.web3.beatoz.getAccount(fromAccount.address);
     return accountResponse.value.nonce;
   }
+
+  newBeatozAccount(): BeatozAccount {
+    return BeatozAccount.newAccount(this);
+  }
 }
