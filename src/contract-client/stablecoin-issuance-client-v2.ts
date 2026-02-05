@@ -124,4 +124,16 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
       issueStablecoinEvent.mintedAmount
     );
   }
+
+  async refund(fromAccount: BeatozAccount, stablecoinContractAddress: string, refundAmount: string) {
+    const methodAbi = this.contract.methods.refund(stablecoinContractAddress, refundAmount).encodeABI();
+    const signedTx = await this.buildSignedTransaction(fromAccount, this.contractAddress, '0', methodAbi, 3000000);
+    const txResult = await this.sendSignedTransaction(signedTx);
+
+    if (txResult.isFailed) {
+      throw new Error(txResult.errorInfo?.toString() ?? 'Transaction failed');
+    }
+
+    return txResult;
+  }
 }
