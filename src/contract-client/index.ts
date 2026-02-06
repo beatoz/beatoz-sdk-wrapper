@@ -6,6 +6,7 @@ export * from './stablecoin-issuance-client';
 export * from './stablecoin-issuance-client-v2';
 export * from './token-btip10-client';
 export * from './btip10-stablecoin-client';
+export * from './permission-stable-btip10-client';
 export * from "./token-btip10-core";
 
 // Types
