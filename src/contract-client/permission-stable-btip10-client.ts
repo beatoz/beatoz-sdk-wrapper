@@ -32,12 +32,21 @@ const PERMISSION_TO_ENUM: Record<string, number> = {
   blacklist: 6,
 };
 
-/** Beatoz view call may return raw { value: { returnData: hex } }; extract hex for decode or build shape for converter */
 function getReturnDataHex(response: any): string | null {
   if (response == null || typeof response !== 'object') return null;
   const data = response.value?.returnData ?? response.returnData;
   if (typeof data !== 'string' || !data) return null;
   return data.startsWith('0x') ? data : `0x${data}`;
+}
+
+const ERROR_STRING_SELECTOR = '0x08c379a0';
+
+function ensureSuccessOrThrow(hex: string | null, decodeError: (h: string) => string): string {
+  if (!hex || hex.length < 10) return hex ?? '';
+  if (hex.startsWith(ERROR_STRING_SELECTOR)) {
+    throw new Error(decodeError(hex));
+  }
+  return hex;
 }
 
 function toConverterShape(hex: string): { value: { returnData: string } } {
@@ -151,18 +160,27 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
     return this.executeTransaction(from, methodAbi, gas);
   }
 
+  private decodeRevertMessage(hex: string): string {
+    if (hex.length <= 10) return 'Unknown error';
+    const encoded = hex.startsWith('0x') ? '0x' + hex.slice(10) : hex.slice(8);
+    const decoded = this.beatozChain.web3.beatoz.abi.decodeParameter('string', encoded);
+    return typeof decoded === 'string' ? decoded : String(decoded);
+  }
+
   async getOwner(): Promise<string> {
     const res = await this.contract.methods.owner().call();
     const hex = getReturnDataHex(res);
-    if (hex) return this.converter.convertAddress(toConverterShape(hex));
+    const safeHex = hex ? ensureSuccessOrThrow(hex, (h) => this.decodeRevertMessage(h)) : null;
+    if (safeHex) return this.converter.convertAddress(toConverterShape(safeHex));
     return typeof res === 'string' ? res : String(res ?? '');
   }
 
   async isPaused(): Promise<boolean> {
     const res = await this.contract.methods.isPaused().call();
     const hex = getReturnDataHex(res);
-    if (hex) {
-      const decoded = this.beatozChain.web3.beatoz.abi.decodeParameter('bool', hex);
+    const safeHex = hex ? ensureSuccessOrThrow(hex, (h) => this.decodeRevertMessage(h)) : null;
+    if (safeHex) {
+      const decoded = this.beatozChain.web3.beatoz.abi.decodeParameter('bool', safeHex);
       if (typeof decoded === 'boolean') return decoded;
       if (typeof decoded === 'bigint') return decoded !== BigInt(0);
       return Boolean(decoded);
@@ -173,10 +191,11 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
   async getPermissionStatus(account: string): Promise<PermissionStatusResult> {
     const res = await this.contract.methods.getPermissionStatus(account).call();
     const hex = getReturnDataHex(res);
-    if (hex) {
+    const safeHex = hex ? ensureSuccessOrThrow(hex, (h) => this.decodeRevertMessage(h)) : null;
+    if (safeHex) {
       const fragment = this.contractInterface.getFunction('getPermissionStatus');
       if (!fragment) return res as PermissionStatusResult;
-      const decoded = this.contractInterface.decodeFunctionResult(fragment, hex) as unknown as
+      const decoded = this.contractInterface.decodeFunctionResult(fragment, safeHex) as unknown as
         [boolean, boolean, boolean, boolean, boolean, boolean, boolean, bigint, boolean];
       if (Array.isArray(decoded) && decoded.length >= 9) {
         return {
@@ -200,10 +219,11 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
     const enumVal = key in PERMISSION_TO_ENUM ? PERMISSION_TO_ENUM[key] : 0;
     const res = await this.contract.methods.getAddressesWithPermission(enumVal).call();
     const hex = getReturnDataHex(res);
-    if (hex) {
+    const safeHex = hex ? ensureSuccessOrThrow(hex, (h) => this.decodeRevertMessage(h)) : null;
+    if (safeHex) {
       const fragment = this.contractInterface.getFunction('getAddressesWithPermission');
       if (!fragment) return Array.isArray(res) ? (res as string[]) : [];
-      const decoded = this.contractInterface.decodeFunctionResult(fragment, hex) as unknown;
+      const decoded = this.contractInterface.decodeFunctionResult(fragment, safeHex) as unknown;
       if (Array.isArray(decoded)) return decoded as string[];
     }
     return Array.isArray(res) ? (res as string[]) : [];
