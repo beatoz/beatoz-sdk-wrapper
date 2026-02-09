@@ -10,6 +10,40 @@ import {
 import { Address } from '@beatoz/web3';
 import { TokenBtip10Core } from './token-btip10-core';
 
+export interface PermissionStatusResult {
+  frozen: boolean;
+  blacklisted: boolean;
+  whitelisted: boolean;
+  canSend: boolean;
+  canReceive: boolean;
+  mintRole: boolean;
+  burnRole: boolean;
+  userLimit: string;
+  paused: boolean;
+}
+
+const PERMISSION_TO_ENUM: Record<string, number> = {
+  canSend: 0,
+  canReceive: 1,
+  mintRole: 2,
+  burnRole: 3,
+  whitelist: 4,
+  frozen: 5,
+  blacklist: 6,
+};
+
+/** Beatoz view call may return raw { value: { returnData: hex } }; extract hex for decode or build shape for converter */
+function getReturnDataHex(response: any): string | null {
+  if (response == null || typeof response !== 'object') return null;
+  const data = response.value?.returnData ?? response.returnData;
+  if (typeof data !== 'string' || !data) return null;
+  return data.startsWith('0x') ? data : `0x${data}`;
+}
+
+function toConverterShape(hex: string): { value: { returnData: string } } {
+  return { value: { returnData: hex } };
+}
+
 export class PermissionStableBTIP10Client extends TokenBtip10Core {
   static CONTRACT_NAME = 'PermissionStableBTIP10';
 
@@ -117,14 +151,62 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async getPermissionStatus(account: string) {
-    const res = await this.contract.methods.getPermissionStatus(account).call();
-    return res;
+  async getOwner(): Promise<string> {
+    const res = await this.contract.methods.owner().call();
+    const hex = getReturnDataHex(res);
+    if (hex) return this.converter.convertAddress(toConverterShape(hex));
+    return typeof res === 'string' ? res : String(res ?? '');
   }
 
   async isPaused(): Promise<boolean> {
     const res = await this.contract.methods.isPaused().call();
-    return res as unknown as boolean;
+    const hex = getReturnDataHex(res);
+    if (hex) {
+      const decoded = this.beatozChain.web3.beatoz.abi.decodeParameter('bool', hex);
+      if (typeof decoded === 'boolean') return decoded;
+      if (typeof decoded === 'bigint') return decoded !== BigInt(0);
+      return Boolean(decoded);
+    }
+    return Boolean(res);
+  }
+
+  async getPermissionStatus(account: string): Promise<PermissionStatusResult> {
+    const res = await this.contract.methods.getPermissionStatus(account).call();
+    const hex = getReturnDataHex(res);
+    if (hex) {
+      const fragment = this.contractInterface.getFunction('getPermissionStatus');
+      if (!fragment) return res as PermissionStatusResult;
+      const decoded = this.contractInterface.decodeFunctionResult(fragment, hex) as unknown as
+        [boolean, boolean, boolean, boolean, boolean, boolean, boolean, bigint, boolean];
+      if (Array.isArray(decoded) && decoded.length >= 9) {
+        return {
+          frozen: decoded[0],
+          blacklisted: decoded[1],
+          whitelisted: decoded[2],
+          canSend: decoded[3],
+          canReceive: decoded[4],
+          mintRole: decoded[5],
+          burnRole: decoded[6],
+          userLimit: String(decoded[7]),
+          paused: decoded[8],
+        };
+      }
+    }
+    return res as PermissionStatusResult;
+  }
+
+  async getAddressesWithPermission(permission: string): Promise<string[]> {
+    const key = permission.toLowerCase();
+    const enumVal = key in PERMISSION_TO_ENUM ? PERMISSION_TO_ENUM[key] : 0;
+    const res = await this.contract.methods.getAddressesWithPermission(enumVal).call();
+    const hex = getReturnDataHex(res);
+    if (hex) {
+      const fragment = this.contractInterface.getFunction('getAddressesWithPermission');
+      if (!fragment) return Array.isArray(res) ? (res as string[]) : [];
+      const decoded = this.contractInterface.decodeFunctionResult(fragment, hex) as unknown;
+      if (Array.isArray(decoded)) return decoded as string[];
+    }
+    return Array.isArray(res) ? (res as string[]) : [];
   }
 
   private async executeTransaction(from: BeatozAccount, methodAbi: string, gas: number) {
