@@ -10,6 +10,11 @@ export abstract class BaseErc20Client extends BeatozContract {
     readonly converter: BeatozConverter = this.beatozChain.beatozConverter();
     readonly evmEventService = new BeatozEvmEventService(this.contractInterface, this.contractAddress);
 
+    async owner(): Promise<string> {
+        const response = await this.contract.methods.owner().call();
+        return this.converter.convertString(response);
+    }
+
     async totalSupply() {
         const response = await this.contract.methods.totalSupply().call();
         return this.converter.convertUint256(response);

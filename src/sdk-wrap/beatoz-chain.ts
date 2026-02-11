@@ -8,7 +8,7 @@ import { BeatozAddress } from './beatoz-address';
 
 export class BeatozChain {
   readonly web3: Web3;
-  readonly chainType: string = 'beatoz';
+  readonly chainType: string = 'bpun';
   readonly chainId: string;
 
   static async create(web3: Web3) {
