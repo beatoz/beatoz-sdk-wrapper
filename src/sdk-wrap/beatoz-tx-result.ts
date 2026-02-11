@@ -47,6 +47,10 @@ export class BeatozTxResult {
     return this.events.length === 0;
   }
 
+  get errorMsg(): string {
+    return this.errorInfo ? this.errorInfo.toString() : '';
+  }
+
   static parseEvmCallError(err: string, web3: Web3): string | null {
     err = err.toLowerCase();
     if (err.startsWith('08c379a0')) {
