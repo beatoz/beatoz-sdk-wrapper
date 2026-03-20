@@ -14,6 +14,8 @@ export interface PermissionStatusResult {
   frozen: boolean;
   blacklisted: boolean;
   whitelisted: boolean;
+  sendBlocked: boolean;
+  receiveBlocked: boolean;
   canSend: boolean;
   canReceive: boolean;
   mintRole: boolean;
@@ -23,8 +25,8 @@ export interface PermissionStatusResult {
 }
 
 const PERMISSION_TO_ENUM: Record<string, number> = {
-  canSend: 0,
-  canReceive: 1,
+  blockSend: 0,
+  blockReceive: 1,
   mintRole: 2,
   burnRole: 3,
   whitelist: 4,
@@ -124,14 +126,23 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
     return txResult;
   }
 
-  /** Owner: grant/revoke permissions */
-  async setCanSend(from: BeatozAccount, account: string, granted: boolean, gas: number = DEFAULT_GAS) {
-    const methodAbi = await this.contract.methods.setCanSend(account, granted).encodeABI();
+  async blockSend(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+    const methodAbi = await this.contract.methods.blockSend(account).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async setCanReceive(from: BeatozAccount, account: string, granted: boolean, gas: number = DEFAULT_GAS) {
-    const methodAbi = await this.contract.methods.setCanReceive(account, granted).encodeABI();
+  async unblockSend(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+    const methodAbi = await this.contract.methods.unblockSend(account).encodeABI();
+    return this.executeTransaction(from, methodAbi, gas);
+  }
+
+  async blockReceive(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+    const methodAbi = await this.contract.methods.blockReceive(account).encodeABI();
+    return this.executeTransaction(from, methodAbi, gas);
+  }
+
+  async unblockReceive(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+    const methodAbi = await this.contract.methods.unblockReceive(account).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
@@ -198,12 +209,16 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
       const decoded = this.contractInterface.decodeFunctionResult(fragment, safeHex) as unknown as
         [boolean, boolean, boolean, boolean, boolean, boolean, boolean, bigint, boolean];
       if (Array.isArray(decoded) && decoded.length >= 9) {
+        const canSend = decoded[3];
+        const canReceive = decoded[4];
         return {
           frozen: decoded[0],
           blacklisted: decoded[1],
           whitelisted: decoded[2],
-          canSend: decoded[3],
-          canReceive: decoded[4],
+          sendBlocked: !canSend,
+          receiveBlocked: !canReceive,
+          canSend,
+          canReceive,
           mintRole: decoded[5],
           burnRole: decoded[6],
           userLimit: String(decoded[7]),
