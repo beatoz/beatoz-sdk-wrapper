@@ -43,7 +43,7 @@ export class StableCoinClient extends BeatozContract {
     const methodAbi = await this.contract.methods.transfer(toAddress, amount).encodeABI();
     const contractTrxProto = await this.buildContractTransaction(fromAccount, this.contractAddress, '0', methodAbi, 13000000);
 
-    const { rawTransaction } = fromAccount.signTransaction(contractTrxProto);
+    const { rawTransaction } = await fromAccount.signTransactionAsync(contractTrxProto);
     //const { rawTransaction } = account.signTransaction(contractTrxProto, this.btz.chainId)
 
     // broadcast raw transaction

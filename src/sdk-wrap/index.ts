@@ -1,5 +1,6 @@
 // Core SDK Components
 export * from './beatoz-account';
+export * from './beatoz-external-signer';
 export * from './beatoz-address';
 export * from './beatoz-chain';
 export * from './beatoz-factory';

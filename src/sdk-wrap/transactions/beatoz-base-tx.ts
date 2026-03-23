@@ -7,7 +7,7 @@ export class BeatozBaseTx {
   constructor(readonly beatozChain: BeatozChain) {}
 
   async buildSignedTransaction(unsignedTrxProto: TrxProto, from: BeatozAccount) {
-    const { rawTransaction, transactionHash } = from.signTransaction(unsignedTrxProto);
+    const { rawTransaction } = await from.signTransactionAsync(unsignedTrxProto);
     return rawTransaction;
   }
 

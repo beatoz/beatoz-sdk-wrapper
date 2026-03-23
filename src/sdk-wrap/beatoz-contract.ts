@@ -49,7 +49,7 @@ export class BeatozContract {
 
   async buildSignedTransaction(from: BeatozAccount, to: string, amount: string, methodAbi: string, gas: number) {
     const contractTrxProto = await this.buildContractTransaction(from, to, amount, methodAbi, gas);
-    const { rawTransaction } = from.signTransaction(contractTrxProto);
+    const { rawTransaction } = await from.signTransactionAsync(contractTrxProto);
     return rawTransaction;
   }
 
