@@ -16,8 +16,6 @@ export interface PermissionStatusResult {
   whitelisted: boolean;
   sendBlocked: boolean;
   receiveBlocked: boolean;
-  canSend: boolean;
-  canReceive: boolean;
   mintRole: boolean;
   burnRole: boolean;
   userLimit: string;
@@ -209,16 +207,12 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
       const decoded = this.contractInterface.decodeFunctionResult(fragment, safeHex) as unknown as
         [boolean, boolean, boolean, boolean, boolean, boolean, boolean, bigint, boolean];
       if (Array.isArray(decoded) && decoded.length >= 9) {
-        const canSend = decoded[3];
-        const canReceive = decoded[4];
         return {
           frozen: decoded[0],
           blacklisted: decoded[1],
           whitelisted: decoded[2],
-          sendBlocked: !canSend,
-          receiveBlocked: !canReceive,
-          canSend,
-          canReceive,
+          sendBlocked: decoded[3],
+          receiveBlocked: decoded[4],
           mintRole: decoded[5],
           burnRole: decoded[6],
           userLimit: String(decoded[7]),
