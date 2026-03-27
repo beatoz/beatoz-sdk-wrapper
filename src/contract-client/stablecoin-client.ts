@@ -1,6 +1,6 @@
 /** @format */
 
-import {BeatozAccount, BeatozContract, BeatozConverter, BeatozContractDeployer, DEFAULT_GAS} from '../sdk-wrap';
+import { BeatozTxSigner, BeatozContract, BeatozConverter, BeatozContractDeployer, DEFAULT_GAS } from '../sdk-wrap';
 
 export class StableCoinClient extends BeatozContract {
   static CONTRACT_NAME = 'BeatozStablecoin';
@@ -8,7 +8,7 @@ export class StableCoinClient extends BeatozContract {
 
   static async deploy(
     contractDeployer: BeatozContractDeployer,
-    deployAccount: BeatozAccount,
+    deployAccount: BeatozTxSigner,
     tokenName: string,
     tokenSymbol: string,
     decimal: number,
@@ -39,7 +39,7 @@ export class StableCoinClient extends BeatozContract {
     return this.converter.convertString(result);
   }
 
-  async transfer(fromAccount: BeatozAccount, toAddress: string, amount: string) {
+  async transfer(fromAccount: BeatozTxSigner, toAddress: string, amount: string) {
     const methodAbi = await this.contract.methods.transfer(toAddress, amount).encodeABI();
     const contractTrxProto = await this.buildContractTransaction(fromAccount, this.contractAddress, '0', methodAbi, 13000000);
 

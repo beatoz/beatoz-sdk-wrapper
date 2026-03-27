@@ -1,17 +1,12 @@
-import {
-  BeatozAccount,
-  BeatozChain,
-  ContractJsonReader,
-  BeatozContractDeployer, DEFAULT_GAS,
-} from '../sdk-wrap';
-import {BaseErc20Client} from "./base-erc20-client";
+import { BeatozTxSigner, BeatozChain, ContractJsonReader, BeatozContractDeployer, DEFAULT_GAS } from '../sdk-wrap';
+import { BaseErc20Client } from './base-erc20-client';
 
 export class TokenErc20Client extends BaseErc20Client {
   static CONTRACT_NAME = 'TokenERC20';
 
   static async deploy(
     contractDeployer: BeatozContractDeployer,
-    deployAccount: BeatozAccount,
+    deployAccount: BeatozTxSigner,
     tokenName: string,
     tokenSymbol: string,
     initSupply: string,

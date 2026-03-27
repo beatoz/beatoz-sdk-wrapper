@@ -3,11 +3,8 @@
 import { Web3Account } from '@beatoz/web3-accounts';
 import { TrxProto } from '@beatoz/web3-types/lib/commonjs/trx_proto';
 import { BeatozChain } from './beatoz-chain';
-import {BeatozTransferTx} from "./transactions";
-import {
-  BeatozExternalSigner,
-  BeatozSignedTransaction,
-} from './beatoz-external-signer';
+import { BeatozTransferTx } from './transactions';
+import { BeatozExternalSigner, BeatozSignedTransaction } from './beatoz-external-signer';
 
 export class BeatozAccount {
   readonly beatozChain: BeatozChain;
@@ -16,28 +13,19 @@ export class BeatozAccount {
   private readonly externalAddress?: string;
 
   static newAccount(beatozChain: BeatozChain) {
-    const web3Account = beatozChain.web3.beatoz.accounts.create()
-    return new BeatozAccount(beatozChain, web3Account)
+    const web3Account = beatozChain.web3.beatoz.accounts.create();
+    return new BeatozAccount(beatozChain, web3Account);
   }
 
   static fromPrivateKey(beatozChain: BeatozChain, privateKey: string) {
     return beatozChain.getBeatozAccount(privateKey);
   }
 
-  static fromExternalSigner(
-    beatozChain: BeatozChain,
-    address: string,
-    externalSigner: BeatozExternalSigner,
-  ) {
+  static fromExternalSigner(beatozChain: BeatozChain, address: string, externalSigner: BeatozExternalSigner) {
     return new BeatozAccount(beatozChain, undefined, externalSigner, address);
   }
 
-  constructor(
-    beatozChain: BeatozChain,
-    account?: Web3Account,
-    externalSigner?: BeatozExternalSigner,
-    externalAddress?: string,
-  ) {
+  constructor(beatozChain: BeatozChain, account?: Web3Account, externalSigner?: BeatozExternalSigner, externalAddress?: string) {
     this.beatozChain = beatozChain;
     this.account = account;
     this.externalSigner = externalSigner;
@@ -63,7 +51,7 @@ export class BeatozAccount {
   }
 
   async send(toAddress: string, amount: string) {
-    return await (new BeatozTransferTx(this.beatozChain).transfer(this, toAddress, amount))
+    return await new BeatozTransferTx(this.beatozChain).transfer(this, toAddress, amount);
   }
 
   signTransaction(trxProto: TrxProto) {
@@ -75,10 +63,7 @@ export class BeatozAccount {
 
   async signTransactionAsync(trxProto: TrxProto): Promise<BeatozSignedTransaction> {
     if (this.account) {
-      const { rawTransaction, transactionHash } = this.account.signTransaction(
-        trxProto,
-        this.beatozChain.chainId,
-      );
+      const { rawTransaction, transactionHash } = this.account.signTransaction(trxProto, this.beatozChain.chainId);
       return {
         rawTransaction,
         transactionHash,

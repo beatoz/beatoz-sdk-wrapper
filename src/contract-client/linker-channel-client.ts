@@ -1,11 +1,11 @@
-import {BeatozAccount, BeatozChain, BeatozContract, ContractJsonReader, BeatozContractDeployer, DEFAULT_GAS} from '../sdk-wrap';
+import { BeatozTxSigner, BeatozChain, BeatozContract, ContractJsonReader, BeatozContractDeployer, DEFAULT_GAS } from '../sdk-wrap';
 
 export class LinkerChannelClient extends BeatozContract {
   static CONTRACT_NAME = 'LinkerChannel';
 
   static async deploy(
     contractDeployer: BeatozContractDeployer,
-    deployAccount: BeatozAccount,
+    deployAccount: BeatozTxSigner,
     dAppContractAddress: string,
     dAppOwnerAddress: string,
     gas: number = DEFAULT_GAS
@@ -27,7 +27,7 @@ export class LinkerChannelClient extends BeatozContract {
     return this.beatozChain.beatozConverter().convertUint256(result);
   }
 
-  async addDAppChannel(ownerAccount: BeatozAccount, toChainId: string, toDAppContractAddress: string) {
+  async addDAppChannel(ownerAccount: BeatozTxSigner, toChainId: string, toDAppContractAddress: string) {
     const methodAbi = await this.contract.methods.addDAppChannel(toChainId, toDAppContractAddress).encodeABI();
     const signedTx = await this.buildSignedTransaction(ownerAccount, this.contractAddress, '0', methodAbi, 3500000);
     const txResult = await this.sendSignedTransaction(signedTx);

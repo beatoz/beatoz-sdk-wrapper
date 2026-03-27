@@ -1,5 +1,5 @@
 import { LinkerChannelClient, LinkerEndpointClient, TokenBTIP10Client } from '../../contract-client';
-import { BeatozAccount } from '../beatoz-account';
+import { BeatozTxSigner } from '../beatoz-tx-signer';
 import { BeatozProvider } from '../beatoz-provider';
 
 export class BpunPrepareLinkerProtocol {
@@ -10,7 +10,7 @@ export class BpunPrepareLinkerProtocol {
 
   async prepareLinkerProtocol(
     newBtipToken: TokenBTIP10Client,
-    tokenOwnerAccount: BeatozAccount,
+    tokenOwnerAccount: BeatozTxSigner,
     targetChainId: string,
     targetBtip10TokenAddress: string
   ) {
@@ -19,16 +19,16 @@ export class BpunPrepareLinkerProtocol {
   }
 
   async addDAppChannel(
-      btip10Token: TokenBTIP10Client,
-      tokenOwner: BeatozAccount,
-      targetChainId: string,
-      targetBtip10TokenAddress: string
+    btip10Token: TokenBTIP10Client,
+    tokenOwner: BeatozTxSigner,
+    targetChainId: string,
+    targetBtip10TokenAddress: string
   ) {
     const linkerChannelAddress = await btip10Token.linkerChannel();
     const linkerChannelClient = LinkerChannelClient.create(
-        this.beatozProvider.beatozChain,
-        this.beatozProvider.contractJsonReader,
-        linkerChannelAddress
+      this.beatozProvider.beatozChain,
+      this.beatozProvider.contractJsonReader,
+      linkerChannelAddress
     );
 
     await linkerChannelClient.addDAppChannel(tokenOwner, targetChainId, targetBtip10TokenAddress);

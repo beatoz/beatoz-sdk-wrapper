@@ -1,12 +1,6 @@
 /** @format */
 
-import {
-  BeatozAccount,
-  BeatozChain,
-  ContractJsonReader,
-  BeatozContractDeployer,
-  DEFAULT_GAS,
-} from '../sdk-wrap';
+import { BeatozTxSigner, BeatozChain, ContractJsonReader, BeatozContractDeployer, DEFAULT_GAS } from '../sdk-wrap';
 import { Address } from '@beatoz/web3';
 import { TokenBtip10Core } from './token-btip10-core';
 
@@ -58,18 +52,13 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
 
   static async deploy(
     contractDeployer: BeatozContractDeployer,
-    deployAccount: BeatozAccount,
+    deployAccount: BeatozTxSigner,
     tokenName: string,
     tokenSymbol: string,
     owner: string,
     gas: number = DEFAULT_GAS
   ): Promise<string> {
-    const contractAddress = await contractDeployer.deploy(
-      this.CONTRACT_NAME,
-      deployAccount,
-      [tokenName, tokenSymbol, owner],
-      gas
-    );
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [tokenName, tokenSymbol, owner], gas);
     return contractAddress;
   }
 
@@ -81,42 +70,26 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
   ): PermissionStableBTIP10Client {
     const contractJson = contractJsonReader.readContractJson(this.CONTRACT_NAME);
     const linkerEndpointContractJson = contractJsonReader.readContractJson(linkerEndpointContractName);
-    return new PermissionStableBTIP10Client(
-      btzWeb3,
-      contractAddress,
-      contractJson,
-      linkerEndpointContractJson
-    );
+    return new PermissionStableBTIP10Client(btzWeb3, contractAddress, contractJson, linkerEndpointContractJson);
   }
 
-  constructor(
-    btzWeb3: BeatozChain,
-    contractAddress: string,
-    contractJson: any,
-    linkerEndpointContractJson: any
-  ) {
+  constructor(btzWeb3: BeatozChain, contractAddress: string, contractJson: any, linkerEndpointContractJson: any) {
     super(btzWeb3, contractAddress, contractJson, linkerEndpointContractJson);
   }
 
-  async mint(from: BeatozAccount, to: Address, mintAmount: string, gas: number = DEFAULT_GAS) {
+  async mint(from: BeatozTxSigner, to: Address, mintAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.mint(to, mintAmount).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async burn(from: BeatozAccount, burnAmount: string, gas: number = DEFAULT_GAS) {
+  async burn(from: BeatozTxSigner, burnAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.burn(burnAmount).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async setLinkerEndpoint(ownerAccount: BeatozAccount, endpointAddress: string, gas: number = 3500000) {
+  async setLinkerEndpoint(ownerAccount: BeatozTxSigner, endpointAddress: string, gas: number = 3500000) {
     const methodAbi = await this.contract.methods.setLinkerEndpoint(endpointAddress).encodeABI();
-    const signedTx = await this.buildSignedTransaction(
-      ownerAccount,
-      this.contractAddress,
-      '0',
-      methodAbi,
-      gas
-    );
+    const signedTx = await this.buildSignedTransaction(ownerAccount, this.contractAddress, '0', methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
     if (txResult.isFailed) {
       throw new Error(txResult.errorInfo?.toString() ?? 'setLinkerEndpoint failed');
@@ -124,47 +97,47 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
     return txResult;
   }
 
-  async blockSend(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+  async blockSend(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.blockSend(account).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async unblockSend(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+  async unblockSend(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.unblockSend(account).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async blockReceive(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+  async blockReceive(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.blockReceive(account).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async unblockReceive(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+  async unblockReceive(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.unblockReceive(account).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async setMintRole(from: BeatozAccount, account: string, granted: boolean, gas: number = DEFAULT_GAS) {
+  async setMintRole(from: BeatozTxSigner, account: string, granted: boolean, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.setMintRole(account, granted).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async setBurnRole(from: BeatozAccount, account: string, granted: boolean, gas: number = DEFAULT_GAS) {
+  async setBurnRole(from: BeatozTxSigner, account: string, granted: boolean, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.setBurnRole(account, granted).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async freeze(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+  async freeze(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.freeze(account).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async unfreeze(from: BeatozAccount, account: string, gas: number = DEFAULT_GAS) {
+  async unfreeze(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.unfreeze(account).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async setPaused(from: BeatozAccount, paused: boolean, gas: number = DEFAULT_GAS) {
+  async setPaused(from: BeatozTxSigner, paused: boolean, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.setPaused(paused).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
@@ -204,8 +177,17 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
     if (safeHex) {
       const fragment = this.contractInterface.getFunction('getPermissionStatus');
       if (!fragment) return res as PermissionStatusResult;
-      const decoded = this.contractInterface.decodeFunctionResult(fragment, safeHex) as unknown as
-        [boolean, boolean, boolean, boolean, boolean, boolean, boolean, bigint, boolean];
+      const decoded = this.contractInterface.decodeFunctionResult(fragment, safeHex) as unknown as [
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        bigint,
+        boolean,
+      ];
       if (Array.isArray(decoded) && decoded.length >= 9) {
         return {
           frozen: decoded[0],
@@ -238,7 +220,7 @@ export class PermissionStableBTIP10Client extends TokenBtip10Core {
     return Array.isArray(res) ? (res as string[]) : [];
   }
 
-  private async executeTransaction(from: BeatozAccount, methodAbi: string, gas: number) {
+  private async executeTransaction(from: BeatozTxSigner, methodAbi: string, gas: number) {
     const signedTx = await this.buildSignedTransaction(from, this.contractAddress, '0', methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
     if (txResult.isFailed) {

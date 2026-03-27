@@ -1,25 +1,19 @@
-import {BeatozAccount, BeatozChain, ContractJsonReader, BeatozContractDeployer, DEFAULT_GAS} from '../sdk-wrap';
-import { TokenBTIP10Client } from './token-btip10-client';
-import {Address} from "@beatoz/web3";
-import {TokenBtip10Core} from "./token-btip10-core";
+import { BeatozTxSigner, BeatozChain, ContractJsonReader, BeatozContractDeployer, DEFAULT_GAS } from '../sdk-wrap';
+import { Address } from '@beatoz/web3';
+import { TokenBtip10Core } from './token-btip10-core';
 
 export class Btip10StablecoinClient extends TokenBtip10Core {
   static CONTRACT_NAME = 'BTIP10Stablecoin';
 
   static async deploy(
     contractDeployer: BeatozContractDeployer,
-    deployAccount: BeatozAccount,
+    deployAccount: BeatozTxSigner,
     tokenName: string,
     tokenSymbol: string,
     owner: string,
     gas: number = DEFAULT_GAS
   ) {
-    const contractAddress = await contractDeployer.deploy(
-        this.CONTRACT_NAME,
-        deployAccount,
-        [tokenName, tokenSymbol, owner],
-        gas
-    );
+    const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [tokenName, tokenSymbol, owner], gas);
     return contractAddress;
   }
 
@@ -34,17 +28,17 @@ export class Btip10StablecoinClient extends TokenBtip10Core {
     super(btzWeb3, contractAddress, contractJson, linkerEndpointContractJson);
   }
 
-  async mint(from: BeatozAccount, to: Address, mintAmount: string, gas: number = DEFAULT_GAS) {
+  async mint(from: BeatozTxSigner, to: Address, mintAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.mint(to, mintAmount).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  async burn(from: BeatozAccount, burnAmount: string, gas: number = DEFAULT_GAS) {
+  async burn(from: BeatozTxSigner, burnAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = await this.contract.methods.burn(burnAmount).encodeABI();
     return this.executeTransaction(from, methodAbi, gas);
   }
 
-  private async executeTransaction(from: BeatozAccount, methodAbi: string, gas: number) {
+  private async executeTransaction(from: BeatozTxSigner, methodAbi: string, gas: number) {
     const signedTx = await this.buildSignedTransaction(from, this.contractAddress, '0', methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
     if (txResult.isFailed) {

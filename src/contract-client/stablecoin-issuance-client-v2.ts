@@ -1,12 +1,13 @@
 /** @format */
 import {
-  BeatozAccount,
+  BeatozTxSigner,
   BeatozChain,
   BeatozContract,
   BeatozConverter,
   BeatozEvmEventService,
   ContractJsonReader,
-  BeatozContractDeployer, DEFAULT_GAS,
+  BeatozContractDeployer,
+  DEFAULT_GAS,
 } from '../sdk-wrap';
 import { IssueStablecoin } from './type/issue-stablecoin';
 import { StablecoinInfo } from './type/stablecoin-info';
@@ -16,7 +17,7 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
   readonly evmEventService = new BeatozEvmEventService(this.contractInterface, this.contractAddress);
   readonly btzConverter = new BeatozConverter(this.beatozChain);
 
-  static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozAccount, gas: number = DEFAULT_GAS) {
+  static async deploy(contractDeployer: BeatozContractDeployer, deployAccount: BeatozTxSigner, gas: number = DEFAULT_GAS) {
     const contractAddress = await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [], gas);
     return contractAddress;
   }
@@ -46,7 +47,7 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
     return this.btzConverter.convertUint256(result);
   }
 
-  async depositCollateral(issuerAccount: BeatozAccount, depositAmount: string, gas: number = DEFAULT_GAS){
+  async depositCollateral(issuerAccount: BeatozTxSigner, depositAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = this.contract.methods.depositCollateral().encodeABI();
     const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, depositAmount, methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
@@ -55,16 +56,26 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
     }
   }
 
-  async depositTokenCollateral(collateralTokenContract: string, issuerAccount: BeatozAccount, depositAmount: string, gas: number = DEFAULT_GAS) {
+  async depositTokenCollateral(
+    collateralTokenContract: string,
+    issuerAccount: BeatozTxSigner,
+    depositAmount: string,
+    gas: number = DEFAULT_GAS
+  ) {
     const methodAbi = this.contract.methods.depositTokenCollateral(collateralTokenContract, depositAmount).encodeABI();
-    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, "0", methodAbi, gas);
+    const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, '0', methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
     if (txResult.isFailed) {
       throw new Error(txResult.errorInfo?.toString() ?? 'Transaction failed');
     }
   }
 
-  async depositAndMintStablecoin(fromAccount: BeatozAccount, stableCoinContractAddress: string, mintAmount: string, gas: number = DEFAULT_GAS) {
+  async depositAndMintStablecoin(
+    fromAccount: BeatozTxSigner,
+    stableCoinContractAddress: string,
+    mintAmount: string,
+    gas: number = DEFAULT_GAS
+  ) {
     const methodAbi = this.contract.methods.mintAdditionalStablecoin(stableCoinContractAddress).encodeABI();
     const signedTx = await this.buildSignedTransaction(fromAccount, this.contractAddress, mintAmount, methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
@@ -75,7 +86,7 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
     return txResult.isSuccess;
   }
 
-  async mintStablecoin(issuerAccount: BeatozAccount, stableCoinContractAddress: string, mintAmount: string, gas: number = DEFAULT_GAS) {
+  async mintStablecoin(issuerAccount: BeatozTxSigner, stableCoinContractAddress: string, mintAmount: string, gas: number = DEFAULT_GAS) {
     const methodAbi = this.contract.methods.mintStablecoin(stableCoinContractAddress, mintAmount).encodeABI();
     const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, '0', methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
@@ -85,7 +96,14 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
     return txResult.isSuccess;
   }
 
-  async deployAndMintStablecoin(issuerAccount: BeatozAccount, stablecoinName: string, symbol: string, decimal: number, mintAmount: string, gas: number = DEFAULT_GAS) {
+  async deployAndMintStablecoin(
+    issuerAccount: BeatozTxSigner,
+    stablecoinName: string,
+    symbol: string,
+    decimal: number,
+    mintAmount: string,
+    gas: number = DEFAULT_GAS
+  ) {
     const methodAbi = this.contract.methods.deployAndMintStablecoin(stablecoinName, symbol, decimal, mintAmount).encodeABI();
     const signedTx = await this.buildSignedTransaction(issuerAccount, this.contractAddress, '0', methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
@@ -110,7 +128,7 @@ export class StablecoinIssuanceClientV2 extends BeatozContract {
   }
 
   async depositAndDeployAndMintStablecoin(
-    fromAccount: BeatozAccount,
+    fromAccount: BeatozTxSigner,
     stableCoinName: string,
     symbol: string,
     decimal: number,

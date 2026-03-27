@@ -1,9 +1,9 @@
 import { TrxProtoBuilder } from '@beatoz/web3-accounts';
-import { BeatozAccount } from '../beatoz-account';
+import { BeatozTxSigner } from '../beatoz-tx-signer';
 import { BeatozBaseTx } from './beatoz-base-tx';
 
 export class BeatozContractTx extends BeatozBaseTx {
-  async buildContractTransaction(from: BeatozAccount, to: string, amount: string, methodAbi: string, gas: number) {
+  async buildContractTransaction(from: BeatozTxSigner, to: string, amount: string, methodAbi: string, gas: number) {
     return TrxProtoBuilder.buildContractTrxProto({
       from: from.address,
       to: to,
