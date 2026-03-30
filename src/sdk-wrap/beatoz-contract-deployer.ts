@@ -71,8 +71,7 @@ export class BeatozContractDeployer {
     const signedTransaction = await this.buildSignedDeployTransaction(contractJson, deployAccount, args, gas);
     const beatozTxResult = await this.sendSignedDeployTransaction(signedTransaction);
 
-    const contractAddress = beatozTxResult.returnData;
-    return contractAddress;
+    const contractAddress = await this.contractAddressFromTxHash(beatozTxResult.txHash)
   }
 
   buildDeployData(contractJson: ContractJson, args: any[]): string {
@@ -92,6 +91,19 @@ export class BeatozContractDeployer {
   }
 
   private async contractAddressFromTxHash(txHash: string) {
-    return await this.beatozChain.web3.beatoz.contractAddrFromTx(txHash);
+    const maxRetries = 10;
+    let retries = 0;
+    let contractAddress: string = "";
+    do {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      contractAddress = await this.beatozChain.web3.beatoz.contractAddrFromTx(txHash);
+      retries++;
+    } while (contractAddress === "" && retries < maxRetries);
+
+    if (contractAddress === "") {
+      throw new Error(`Failed to get contract address from tx: ${txHash}`);
+    }
+
+    return contractAddress;
   }
 }
