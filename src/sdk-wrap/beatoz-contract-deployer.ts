@@ -72,6 +72,7 @@ export class BeatozContractDeployer {
     const beatozTxResult = await this.sendSignedDeployTransaction(signedTransaction);
 
     const contractAddress = await this.contractAddressFromTxHash(beatozTxResult.txHash)
+    return contractAddress;
   }
 
   buildDeployData(contractJson: ContractJson, args: any[]): string {
