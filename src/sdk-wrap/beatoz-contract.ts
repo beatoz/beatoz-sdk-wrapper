@@ -1,11 +1,11 @@
 /** @format */
-import { TrxProtoBuilder } from '@beatoz/web3-accounts';
-import { Interface } from 'ethers';
-import { BeatozTxResult } from './beatoz-tx-result';
-import { BeatozConverter } from './beatoz-converter';
-import { BeatozChain } from './beatoz-chain';
-import { BeatozAccount } from './beatoz-account';
-import { ContractJson } from './contract-json';
+import {TrxProtoBuilder} from '@beatoz/web3-accounts';
+import {Interface} from 'ethers';
+import {BeatozTxResult} from './beatoz-tx-result';
+import {BeatozConverter} from './beatoz-converter';
+import {BeatozChain} from './beatoz-chain';
+import {BeatozAccount} from './beatoz-account';
+import {ContractJson} from './contract-json';
 
 export class BeatozContract {
   readonly beatozChain: BeatozChain;
@@ -56,5 +56,13 @@ export class BeatozContract {
   async sendSignedTransaction(signedTransaction: string) {
     const broadcastTxResult = await this.beatozChain.web3.beatoz.broadcastRawTxCommit(signedTransaction);
     return BeatozTxResult.fromTxCommitResponse(broadcastTxResult);
+  }
+
+  async encodeFunctionData(methodName: string, ...args: any[]) {
+    return await (this.contract.methods as any)[methodName](...args).encodeABI();
+  }
+
+  async query(methodName: string, ...args: any[]) {
+    return await (this.contract.methods as any)[methodName](...args).call()
   }
 }
