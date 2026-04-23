@@ -39,7 +39,8 @@ export class BeatozEvmEventService {
 
         if (eventFragment.name == evmEventType.name) {
           const topics: ReadonlyArray<string> = parsedEvmEvent.attributes.topics.map((t: string) => this.add0x(t));
-          const eventArgs = this.contractInterface.decodeEventLog(eventFragment, this.add0x(parsedEvmEvent.attributes.data), topics);
+          const data = parsedEvmEvent.attributes.data ? this.add0x(parsedEvmEvent.attributes.data) : '0x';
+          const eventArgs = this.contractInterface.decodeEventLog(eventFragment, data, topics);
           return this.createEventInstance(evmEventType, eventArgs);
         }
       }
@@ -64,7 +65,8 @@ export class BeatozEvmEventService {
         if (eventFragment == null) continue;
 
         if (eventFragment.name == evmEventType.name) {
-          const eventArgs = this.contractInterface.decodeEventLog(eventFragment, this.add0x(parsedEvmEvent.attributes.data));
+          const data = parsedEvmEvent.attributes.data ? this.add0x(parsedEvmEvent.attributes.data) : '0x';
+          const eventArgs = this.contractInterface.decodeEventLog(eventFragment, data);
           return this.createEventInstance(evmEventType, eventArgs);
         }
       }
