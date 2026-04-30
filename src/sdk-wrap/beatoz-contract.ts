@@ -6,6 +6,7 @@ import {BeatozConverter} from './beatoz-converter';
 import {BeatozChain} from './beatoz-chain';
 import {BeatozAccount} from './beatoz-account';
 import {ContractJson} from './contract-json';
+import {DEFAULT_GAS} from "./beatoz-contract-deployer";
 
 export class BeatozContract {
   readonly beatozChain: BeatozChain;
@@ -64,5 +65,17 @@ export class BeatozContract {
 
   async query(methodName: string, ...args: any[]) {
     return await (this.contract.methods as any)[methodName](...args).call()
+  }
+
+  async invoke(callerAccount: BeatozAccount, methodName: any, args: any[], gas: number = DEFAULT_GAS) {
+    const methodAbi = await this.encodeFunctionData(methodName, ...args);
+    const signedTx = await this.buildSignedTransaction(callerAccount, this.contractAddress, '0', methodAbi, gas);
+    const txResult = await this.sendSignedTransaction(signedTx);
+
+    if (txResult.isFailed) {
+      throw new Error(txResult.errorInfo?.toString() ?? 'Transaction failed');
+    }
+
+    return txResult;
   }
 }

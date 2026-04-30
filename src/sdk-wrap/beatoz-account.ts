@@ -8,6 +8,7 @@ import {
   BeatozExternalSigner,
   BeatozSignedTransaction,
 } from './beatoz-external-signer';
+import {BeatozUnit} from "./constant";
 
 export class BeatozAccount {
   readonly beatozChain: BeatozChain;
@@ -57,9 +58,13 @@ export class BeatozAccount {
     return accountResponse.value.nonce;
   }
 
-  async balance() {
+  async balance(isBeatozUnit: boolean = true) {
     const accountResponse = await this.beatozChain.getAccount(this.address);
-    return accountResponse.value.balance;
+    if (isBeatozUnit) {
+      return this.beatozChain.web3.utils.fromFons(this.beatozChain.web3.utils.toNumber(accountResponse.value.balance), 'beatoz');
+    } else {
+      return accountResponse.value.balance;
+    }
   }
 
   async send(toAddress: string, amount: string) {
