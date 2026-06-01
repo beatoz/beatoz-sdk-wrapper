@@ -71,6 +71,10 @@ export class StablecoinBTIP26ReceiverClient extends BeatozContract {
     return await this.readBytes32('expectedSelector');
   }
 
+  async expectedDstChainIDHash(): Promise<string> {
+    return await this.readBytes32('expectedDstChainIDHash');
+  }
+
   async handledEvents(eventKey: string): Promise<boolean> {
     const result = await this.contract.methods.handledEvents(eventKey).call();
     const hex = getReturnDataHex(result);
@@ -104,6 +108,11 @@ export class StablecoinBTIP26ReceiverClient extends BeatozContract {
     gas: number = DEFAULT_GAS
   ) {
     const methodAbi = this.contract.methods.setExpectedSource(channelID, chaincodeID, selector).encodeABI();
+    return await this.executeTransaction(ownerAccount, methodAbi, gas);
+  }
+
+  async setExpectedDestination(ownerAccount: BeatozTxSigner, dstChainID: string, gas: number = DEFAULT_GAS) {
+    const methodAbi = this.contract.methods.setExpectedDestination(dstChainID).encodeABI();
     return await this.executeTransaction(ownerAccount, methodAbi, gas);
   }
 
