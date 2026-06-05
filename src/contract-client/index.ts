@@ -8,6 +8,7 @@ export * from './token-btip10-client';
 export * from './btip10-stablecoin-client';
 export * from './permission-stable-btip10-client';
 export * from "./token-btip10-core";
+export * from './linker-protocol';
 
 // Types
 export * from './type/issue-stablecoin';
