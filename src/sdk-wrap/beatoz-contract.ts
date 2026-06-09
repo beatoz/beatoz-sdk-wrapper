@@ -6,6 +6,8 @@ import {BeatozConverter} from './beatoz-converter';
 import {BeatozChain} from './beatoz-chain';
 import {BeatozAccount} from './beatoz-account';
 import {ContractJson} from './contract-json';
+import {DEFAULT_GAS} from "./beatoz-contract-deployer";
+import {BeatozContractTx} from "./transactions";
 
 export class BeatozContract {
   readonly beatozChain: BeatozChain;
@@ -13,6 +15,7 @@ export class BeatozContract {
   protected readonly contractInterface: Interface;
   protected readonly contract: any;
   protected readonly converter: BeatozConverter;
+  protected readonly contractTx: BeatozContractTx;
 
   constructor(beatozChain: BeatozChain, contractAddress: string, contractJson: ContractJson) {
     if (contractAddress == undefined || contractAddress == '') {
@@ -23,6 +26,7 @@ export class BeatozContract {
     this.contractInterface = new Interface(contractJson.abi());
     this.contract = new this.beatozChain.web3.beatoz.Contract(contractJson.abi(), contractAddress);
     this.converter = this.beatozChain.beatozConverter();
+    this.contractTx = new BeatozContractTx(this.beatozChain)
   }
 
   get chainType() {
@@ -34,17 +38,7 @@ export class BeatozContract {
   }
 
   async buildContractTransaction(from: BeatozAccount, to: string, amount: string, methodAbi: string, gas: number) {
-    return TrxProtoBuilder.buildContractTrxProto({
-      from: from.address,
-      to: to,
-      nonce: await from.nonce(),
-      amount: amount,
-      payload: { data: methodAbi },
-      //gas: Number(rule.value.maxTrxGas),
-      gas: gas,
-      gasPrice: await this.beatozChain.getGasPrice(),
-      //type: 6,
-    });
+    return this.contractTx.buildContractTransaction(from, to, amount, methodAbi, gas)
   }
 
   async buildSignedTransaction(from: BeatozAccount, to: string, amount: string, methodAbi: string, gas: number) {
@@ -64,5 +58,17 @@ export class BeatozContract {
 
   async query(methodName: string, ...args: any[]) {
     return await (this.contract.methods as any)[methodName](...args).call()
+  }
+
+  async invoke(callerAccount: BeatozAccount, methodName: any, args: any[], gas: number = DEFAULT_GAS) {
+    const methodAbi = await this.encodeFunctionData(methodName, ...args);
+    const signedTx = await this.buildSignedTransaction(callerAccount, this.contractAddress, '0', methodAbi, gas);
+    const txResult = await this.sendSignedTransaction(signedTx);
+
+    if (txResult.isFailed) {
+      throw new Error(txResult.errorInfo?.toString() ?? 'Transaction failed');
+    }
+
+    return txResult;
   }
 }

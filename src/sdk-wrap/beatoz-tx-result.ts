@@ -1,10 +1,28 @@
 /** @format */
 import { BroadcastTxCommitResponse, Web3 } from '@beatoz/web3';
-import { Event } from '@beatoz/web3-types/lib/commonjs/responses';
+import {Event, TxData} from '@beatoz/web3-types/lib/commonjs/responses';
 
 enum TxErrorType {
   check_tx,
   deliver_tx,
+}
+
+export class TxGasInfo {
+  constructor(
+      readonly checkTxGasWanted: string,
+      readonly checkTxGasUsed: string,
+      readonly deliverTxGasWanted: string,
+      readonly deliverTxGasUsed: string
+  ) {}
+
+  static fromTxData(checkTx: TxData, deliverTx?: TxData): TxGasInfo {
+    return new TxGasInfo(
+        checkTx?.gas_wanted ?? '0',
+        checkTx?.gas_used ?? '0',
+        deliverTx?.gas_wanted ?? '0',
+        deliverTx?.gas_used ?? '0'
+    );
+  }
 }
 
 export class ErrorInfo {
@@ -16,23 +34,29 @@ export class ErrorInfo {
   ) {}
 
   toString(): string {
-    return `type: ${this.errorType}, code: ${this.code}, log: ${this.log}, message: ${this.message}`;
+    return `type: ${this.errorType}, code: ${this.code}\nlog: ${this.log}\nmessage: ${this.message}`;
   }
 }
 
 export class BeatozTxResult {
   readonly txHash: string;
+  readonly height: number;
   private readonly result: boolean;
   readonly returnData: string = '';
   readonly events: readonly Event[];
   readonly errorInfo: ErrorInfo | null = null;
+  readonly gasInfo: TxGasInfo;
+  readonly srcTxCommitResponse: BroadcastTxCommitResponse
 
-  constructor(txHash: string, result: boolean, returnData: string, events: readonly Event[] = [], errorInfo: ErrorInfo | null = null) {
-    this.txHash = txHash;
+  constructor(result: boolean, returnData: string, events: readonly Event[] = [], errorInfo: ErrorInfo | null = null, txCommitResponse: BroadcastTxCommitResponse) {
+    this.txHash = txCommitResponse.hash;
+    this.height = txCommitResponse.height;
     this.result = result;
     this.returnData = returnData;
     this.events = events;
     this.errorInfo = errorInfo;
+    this.gasInfo = TxGasInfo.fromTxData(txCommitResponse.check_tx, txCommitResponse.deliver_tx)
+    this.srcTxCommitResponse = txCommitResponse;
   }
 
   get isFailed(): boolean {
@@ -96,7 +120,7 @@ export class BeatozTxResult {
     }
 
     const events = txCommitResponse.deliver_tx?.events ?? [];
-    return new BeatozTxResult(txCommitResponse.hash, result, returnData, events, errorInfo);
+    return new BeatozTxResult(result, returnData, events, errorInfo, txCommitResponse);
   }
 
   static isSuccess(response: BroadcastTxCommitResponse): boolean {
