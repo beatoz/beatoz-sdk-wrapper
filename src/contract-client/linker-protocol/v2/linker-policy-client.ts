@@ -1,4 +1,5 @@
 import {BeatozAccount, BeatozChain, BeatozContract, BeatozContractDeployer, ContractJsonReader, DEFAULT_GAS} from "../../../sdk-wrap";
+import {with0xPrefix} from "../../../sdk-wrap/beatoz-util";
 
 export enum ConfigGroup {
   APPLICATION = 0,
@@ -31,38 +32,33 @@ export class LinkerPolicyClient extends BeatozContract {
   }
 
   async initPolicy(ownerAccount: BeatozAccount, genesisPolicy: string, gas: number = 4_500_000) {
-    if (!genesisPolicy.startsWith('0x')) {
-      genesisPolicy = '0x' + genesisPolicy
-    }
-    const txResult = await this.invoke(ownerAccount, "initPolicy", [genesisPolicy], gas)
+    const txResult = await this.invoke(ownerAccount, "initPolicy", [with0xPrefix(genesisPolicy)], gas)
     return txResult
   }
 
   async syncPolicy(ownerAccount: BeatozAccount, data: string, signatures: any[], mspCerts: any[], messageInfo: any, gas: number = 4_500_000) {
-    const hexData = '0x' + data
-    const txResult = await this.invoke(ownerAccount, "syncPolicy", [hexData, signatures, mspCerts, messageInfo], gas)
+    const txResult = await this.invoke(ownerAccount, "syncPolicy", [with0xPrefix(data), signatures, mspCerts, messageInfo], gas)
     return txResult
   }
 
   async verifyChannelEndorsementPolicy(ownerAccount: BeatozAccount, msgHash: string, signatures: string[], mspIds: string[], certChains: string[][], gas: number = 4_500_000) {
-    const hexMsgHash = msgHash.startsWith('0x') ? msgHash : '0x' + msgHash
-    return await this.invoke(ownerAccount, "verifyChannelEndorsementPolicy", [hexMsgHash, signatures, mspIds, certChains], gas)
+    return await this.invoke(ownerAccount, "verifyChannelEndorsementPolicy", [with0xPrefix(msgHash), signatures, mspIds, certChains], gas)
+  }
+
+  async verifyBlockValidationPolicy(account: BeatozAccount, msgHash: string, signatures: string[], mspIds: string[], certChains: string[][], gas: number = 4_500_000) {
+    return await this.invoke(account, "verifyChannelEndorsementPolicy", [with0xPrefix(msgHash), signatures, mspIds, certChains], gas)
   }
 
   async decodeSecurityPolicy(data: string) {
-    const hexData = '0x' + data
-    const result = await this.contract.methods.decodeSecurityPolicy(hexData).call();
-    return result
+    return await this.contract.methods.decodeSecurityPolicy(with0xPrefix(data)).call()
   }
 
   async decodeConfigPolicy(data: string) {
-    const hexData = '0x' + data
-    return await this.contract.methods.decodeConfigPolicy(hexData).call();
+    return await this.contract.methods.decodeConfigPolicy(with0xPrefix(data)).call();
   }
 
   async decodeOrgPolicy(data: string) {
-    const hexData = '0x' + data
-    return await this.contract.methods.decodeOrgPolicy(hexData).call();
+    return await this.contract.methods.decodeOrgPolicy(with0xPrefix(data)).call();
   }
 
   async getBlockValidationPolicy() {
