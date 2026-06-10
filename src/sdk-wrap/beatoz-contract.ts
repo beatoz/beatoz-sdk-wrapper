@@ -64,11 +64,6 @@ export class BeatozContract {
     const methodAbi = await this.encodeFunctionData(methodName, ...args);
     const signedTx = await this.buildSignedTransaction(callerAccount, this.contractAddress, '0', methodAbi, gas);
     const txResult = await this.sendSignedTransaction(signedTx);
-
-    if (txResult.isFailed) {
-      throw new Error(txResult.errorInfo?.toString() ?? 'Transaction failed');
-    }
-
     return txResult;
   }
 }

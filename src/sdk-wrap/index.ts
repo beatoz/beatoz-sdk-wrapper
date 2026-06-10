@@ -14,6 +14,7 @@ export * from './transactions';
 export * from './linker-protocol';
 
 // Utilities
+export * from './beatoz-util';
 export * from './constant';
 export * from './contract-json-reader';
 export * from './contract-json';
