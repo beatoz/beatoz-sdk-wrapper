@@ -123,6 +123,17 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
     return new Btip26PermissionTokenClient(btzWeb3, contractAddress, contractJson);
   }
 
+  async owner(): Promise<string> {
+    return await this.readAddress('owner');
+  }
+
+  async decimals(): Promise<string> {
+    const result = await this.contract.methods.decimals().call();
+    const hex = getReturnDataHex(result);
+    const decoded = hex ? this.converter.convertUint256(toConverterShape(hex)) : BigInt(result ?? 0);
+    return decoded.toString();
+  }
+
   async registry(): Promise<string> {
     return await this.readAddress('registry');
   }
