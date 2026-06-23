@@ -5,6 +5,7 @@ import {BeatozTxResult} from './beatoz-tx-result';
 import {BeatozConverter} from './beatoz-converter';
 import {BeatozChain} from './beatoz-chain';
 import {BeatozAccount} from './beatoz-account';
+import {BeatozTxSigner} from './beatoz-tx-signer';
 import {ContractJson} from './contract-json';
 import {DEFAULT_GAS} from "./beatoz-contract-deployer";
 import {BeatozContractTx} from "./transactions";
@@ -37,11 +38,11 @@ export class BeatozContract {
     return this.beatozChain.chainId;
   }
 
-  async buildContractTransaction(from: BeatozAccount, to: string, amount: string, methodAbi: string, gas: number) {
+  async buildContractTransaction(from: BeatozTxSigner, to: string, amount: string, methodAbi: string, gas: number) {
     return this.contractTx.buildContractTransaction(from, to, amount, methodAbi, gas)
   }
 
-  async buildSignedTransaction(from: BeatozAccount, to: string, amount: string, methodAbi: string, gas: number) {
+  async buildSignedTransaction(from: BeatozTxSigner, to: string, amount: string, methodAbi: string, gas: number) {
     const contractTrxProto = await this.buildContractTransaction(from, to, amount, methodAbi, gas);
     const { rawTransaction } = await from.signTransactionAsync(contractTrxProto);
     return rawTransaction;

@@ -2,7 +2,7 @@ import { TrxProtoBuilder } from '@beatoz/web3-accounts';
 import { encodeParameters, isAbiConstructorFragment } from '@beatoz/web3-abi';
 import { ContractJsonReader } from './contract-json-reader';
 import { BeatozChain } from './beatoz-chain';
-import { BeatozAccount } from './beatoz-account';
+import { BeatozTxSigner } from './beatoz-tx-signer';
 import { BeatozTxResult } from './beatoz-tx-result';
 import { ContractJson } from './contract-json';
 import { TrxProto } from '@beatoz/web3-types/lib/commonjs/trx_proto';
@@ -16,17 +16,17 @@ export class BeatozContractDeployer {
     readonly contractJsonReader: ContractJsonReader
   ) {}
 
-  async deploy2(contractJsonFilePath: string, deployAccount: BeatozAccount, args: any[], gas: number = DEFAULT_GAS) {
+  async deploy2(contractJsonFilePath: string, deployAccount: BeatozTxSigner, args: any[], gas: number = DEFAULT_GAS) {
     const contractJson = ContractJsonReader.readContractJson(contractJsonFilePath);
     return await this.doDeploy(contractJson, args, deployAccount, gas);
   }
 
-  async deploy(contractName: string, deployAccount: BeatozAccount, args: any[], gas: number = DEFAULT_GAS) {
+  async deploy(contractName: string, deployAccount: BeatozTxSigner, args: any[], gas: number = DEFAULT_GAS) {
     const contractJson = this.contractJsonReader.readContractJson(contractName);
     return await this.doDeploy(contractJson, args, deployAccount, gas);
   }
 
-  async buildDeployTransaction(contractJson: ContractJson, deployAccount: BeatozAccount, args: any[], gas: number = DEFAULT_GAS): Promise<TrxProto> {
+  async buildDeployTransaction(contractJson: ContractJson, deployAccount: BeatozTxSigner, args: any[], gas: number = DEFAULT_GAS): Promise<TrxProto> {
     const deployData = this.buildDeployData(contractJson, args);
     return TrxProtoBuilder.buildContractTrxProto({
       from: deployAccount.address,
@@ -39,7 +39,7 @@ export class BeatozContractDeployer {
     });
   }
 
-  async buildSignedDeployTransaction(contractJson: ContractJson, deployAccount: BeatozAccount, args: any[], gas: number = DEFAULT_GAS): Promise<string> {
+  async buildSignedDeployTransaction(contractJson: ContractJson, deployAccount: BeatozTxSigner, args: any[], gas: number = DEFAULT_GAS): Promise<string> {
     const trxProto = await this.buildDeployTransaction(contractJson, deployAccount, args, gas);
     const { rawTransaction } = await deployAccount.signTransactionAsync(trxProto);
     return rawTransaction;
@@ -57,7 +57,7 @@ export class BeatozContractDeployer {
     return beatozTxResult;
   }
 
-  private async doDeploy(contractJson: ContractJson, args: any[], deployAccount: BeatozAccount, gas: number) {
+  private async doDeploy(contractJson: ContractJson, args: any[], deployAccount: BeatozTxSigner, gas: number) {
     const signedTransaction = await this.buildSignedDeployTransaction(contractJson, deployAccount, args, gas);
     const beatozTxResult = await this.sendSignedDeployTransaction(signedTransaction);
 
