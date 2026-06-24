@@ -1,13 +1,6 @@
 /** @format */
 
-import {
-  BeatozChain,
-  BeatozContractDeployer,
-  BeatozTxResult,
-  BeatozTxSigner,
-  ContractJsonReader,
-  DEFAULT_GAS,
-} from '../sdk-wrap';
+import { BeatozChain, BeatozContractDeployer, BeatozTxResult, BeatozTxSigner, ContractJsonReader, DEFAULT_GAS } from '../sdk-wrap';
 import { BaseErc20Client } from './base-erc20-client';
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -65,6 +58,12 @@ function toConverterShape(hex: string): { value: { returnData: string } } {
   return { value: { returnData: hex } };
 }
 
+function decodeEventAttributeValue(value: string): string {
+  const buf = Buffer.from(value, 'base64');
+  const printable = buf.every((b) => (b >= 32 && b <= 126) || b === 10 || b === 13 || b === 9);
+  return printable ? buf.toString('ascii') : `0x${buf.toString('hex')}`;
+}
+
 export class Btip26PermissionTokenClient extends BaseErc20Client {
   static CONTRACT_NAME = 'Btip26PermissionToken';
 
@@ -78,12 +77,7 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
     initialSupply: string = '0',
     gas: number = DEFAULT_GAS
   ): Promise<string> {
-    return await contractDeployer.deploy(
-      this.CONTRACT_NAME,
-      deployAccount,
-      [tokenName, tokenSymbol, decimals, owner, initialSupply],
-      gas
-    );
+    return await contractDeployer.deploy(this.CONTRACT_NAME, deployAccount, [tokenName, tokenSymbol, decimals, owner, initialSupply], gas);
   }
 
   static async deploy2(
@@ -105,20 +99,12 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
     );
   }
 
-  static create(
-    btzWeb3: BeatozChain,
-    contractJsonReader: ContractJsonReader,
-    contractAddress: string
-  ): Btip26PermissionTokenClient {
+  static create(btzWeb3: BeatozChain, contractJsonReader: ContractJsonReader, contractAddress: string): Btip26PermissionTokenClient {
     const contractJson = contractJsonReader.readContractJson(this.CONTRACT_NAME);
     return new Btip26PermissionTokenClient(btzWeb3, contractAddress, contractJson);
   }
 
-  static create2(
-    btzWeb3: BeatozChain,
-    contractJsonFilePath: string,
-    contractAddress: string
-  ): Btip26PermissionTokenClient {
+  static create2(btzWeb3: BeatozChain, contractJsonFilePath: string, contractAddress: string): Btip26PermissionTokenClient {
     const contractJson = ContractJsonReader.readContractJson(contractJsonFilePath);
     return new Btip26PermissionTokenClient(btzWeb3, contractAddress, contractJson);
   }
@@ -167,12 +153,7 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
     return await this.executeMethod(ownerAccount, 'setRegistry', [registry], gas);
   }
 
-  async setPaymentSource(
-    ownerAccount: BeatozTxSigner,
-    channelId: string,
-    chaincodeId: string,
-    gas: number = DEFAULT_GAS
-  ) {
+  async setPaymentSource(ownerAccount: BeatozTxSigner, channelId: string, chaincodeId: string, gas: number = DEFAULT_GAS) {
     return await this.executeMethod(ownerAccount, 'setPaymentSource', [channelId, chaincodeId], gas);
   }
 
@@ -202,12 +183,7 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
     memo: string = '0x',
     gas: number = DEFAULT_GAS
   ): Promise<Btip26TransferResult> {
-    const txResult = await this.executeMethod(
-      fromAccount,
-      'transferToBPrN',
-      [to, amount, beneficiary, bytesArg(memo)],
-      gas
-    );
+    const txResult = await this.executeMethod(fromAccount, 'transferToBPrN', [to, amount, beneficiary, bytesArg(memo)], gas);
     return this.toTransferResult(txResult, 'transferToBPrN');
   }
 
@@ -218,12 +194,7 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
     memo: string = '0x',
     gas: number = DEFAULT_GAS
   ): Promise<Btip26TransferResult> {
-    const txResult = await this.executeMethod(
-      fromAccount,
-      'burnToBPrN',
-      [amount, beneficiary, bytesArg(memo)],
-      gas
-    );
+    const txResult = await this.executeMethod(fromAccount, 'burnToBPrN', [amount, beneficiary, bytesArg(memo)], gas);
     return this.toTransferResult(txResult, 'burnToBPrN');
   }
 
@@ -231,12 +202,7 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
     const result = await this.contract.methods.pending(bytes32Arg(correlationId)).call();
     const hex = getReturnDataHex(result);
     if (hex) {
-      const decoded = this.contractInterface.decodeFunctionResult('pending', hex) as unknown as [
-        string,
-        bigint,
-        string,
-        boolean,
-      ];
+      const decoded = this.contractInterface.decodeFunctionResult('pending', hex) as unknown as [string, bigint, string, boolean];
       return {
         sender: decoded[0],
         amount: String(decoded[1]),
@@ -394,13 +360,49 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
   }
 
   private toTransferResult(txResult: BeatozTxResult, methodName: string): Btip26TransferResult {
-    const returnData = with0xPrefix(txResult.returnData);
-    const decoded = this.contractInterface.decodeFunctionResult(methodName, returnData) as unknown as [string];
+    const correlationId = this.findCorrelationIdFromEvents(txResult) ?? this.findCorrelationIdFromReturnData(txResult, methodName);
+    if (!correlationId) {
+      throw new Error(`${methodName} did not emit or return a correlationId`);
+    }
     return {
       txResult,
       txHash: txResult.txHash,
-      correlationId: decoded[0],
+      correlationId,
     };
+  }
+
+  private findCorrelationIdFromEvents(txResult: BeatozTxResult): string | null {
+    const eventNames = ['TransferLogAttrs', 'BPrNTransferRequested'] as const;
+    const topicHashes = eventNames
+      .map((eventName) => this.contractInterface.getEvent(eventName)?.topicHash?.toLowerCase())
+      .filter((topicHash): topicHash is string => Boolean(topicHash));
+
+    for (const event of txResult.events) {
+      if ((event as any)?.type !== 'evm') continue;
+      const attrs: Record<string, string> = {};
+      for (const attr of ((event as any).attributes ?? []) as Array<{ key: string; value: string }>) {
+        const key = Buffer.from(attr.key, 'base64').toString('ascii');
+        attrs[key] = decodeEventAttributeValue(attr.value);
+      }
+
+      const topic0 = attrs['topic.0'] ? with0xPrefix(attrs['topic.0']).toLowerCase() : null;
+      if (!topic0 || !topicHashes.includes(topic0)) continue;
+
+      const correlationId = attrs['topic.1'];
+      if (!correlationId) continue;
+      return bytes32Arg(correlationId).toLowerCase();
+    }
+    return null;
+  }
+
+  private findCorrelationIdFromReturnData(txResult: BeatozTxResult, methodName: string): string | null {
+    if (!txResult.returnData) return null;
+    try {
+      const decoded = this.contractInterface.decodeFunctionResult(methodName, with0xPrefix(txResult.returnData)) as unknown as [string];
+      return typeof decoded[0] === 'string' ? bytes32Arg(decoded[0]).toLowerCase() : null;
+    } catch {
+      return null;
+    }
   }
 
   private async readAddress(methodName: string): Promise<string> {
