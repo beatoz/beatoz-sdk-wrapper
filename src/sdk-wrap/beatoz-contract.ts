@@ -1,14 +1,14 @@
 /** @format */
-import {TrxProtoBuilder} from '@beatoz/web3-accounts';
-import {Interface} from 'ethers';
-import {BeatozTxResult} from './beatoz-tx-result';
-import {BeatozConverter} from './beatoz-converter';
-import {BeatozChain} from './beatoz-chain';
-import {BeatozAccount} from './beatoz-account';
-import {BeatozTxSigner} from './beatoz-tx-signer';
-import {ContractJson} from './contract-json';
-import {DEFAULT_GAS} from "./beatoz-contract-deployer";
-import {BeatozContractTx} from "./transactions";
+import type { TrxProto } from '@beatoz/web3-types';
+import { Interface } from 'ethers';
+import { BeatozTxResult } from './beatoz-tx-result';
+import { BeatozConverter } from './beatoz-converter';
+import { BeatozChain } from './beatoz-chain';
+import { BeatozAccount } from './beatoz-account';
+import { BeatozTxSigner } from './beatoz-tx-signer';
+import { ContractJson } from './contract-json';
+import { DEFAULT_GAS } from './beatoz-contract-deployer';
+import { BeatozContractTx } from './transactions';
 
 export class BeatozContract {
   readonly beatozChain: BeatozChain;
@@ -27,7 +27,7 @@ export class BeatozContract {
     this.contractInterface = new Interface(contractJson.abi());
     this.contract = new this.beatozChain.web3.beatoz.Contract(contractJson.abi(), contractAddress);
     this.converter = this.beatozChain.beatozConverter();
-    this.contractTx = new BeatozContractTx(this.beatozChain)
+    this.contractTx = new BeatozContractTx(this.beatozChain);
   }
 
   get chainType() {
@@ -38,8 +38,8 @@ export class BeatozContract {
     return this.beatozChain.chainId;
   }
 
-  async buildContractTransaction(from: BeatozTxSigner, to: string, amount: string, methodAbi: string, gas: number) {
-    return this.contractTx.buildContractTransaction(from, to, amount, methodAbi, gas)
+  async buildContractTransaction(from: BeatozTxSigner, to: string, amount: string, methodAbi: string, gas: number): Promise<TrxProto> {
+    return this.contractTx.buildContractTransaction(from, to, amount, methodAbi, gas);
   }
 
   async buildSignedTransaction(from: BeatozTxSigner, to: string, amount: string, methodAbi: string, gas: number) {
@@ -58,7 +58,7 @@ export class BeatozContract {
   }
 
   async query(methodName: string, ...args: any[]) {
-    return await (this.contract.methods as any)[methodName](...args).call()
+    return await (this.contract.methods as any)[methodName](...args).call();
   }
 
   async invoke(callerAccount: BeatozAccount, methodName: any, args: any[], gas: number = DEFAULT_GAS) {

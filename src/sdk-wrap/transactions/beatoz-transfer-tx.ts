@@ -1,4 +1,5 @@
 import { TrxProtoBuilder } from '@beatoz/web3-accounts';
+import type { TrxProto } from '@beatoz/web3-types';
 import { BeatozAccount } from '../beatoz-account';
 import { BeatozBaseTx } from './beatoz-base-tx';
 
@@ -9,7 +10,7 @@ export class BeatozTransferTx extends BeatozBaseTx {
     return await this.sendSignedTransaction(signedTransaction);
   }
 
-  async buildTransferTransaction(fromAccount: BeatozAccount, toAddress: string, amount: string, gas: number = 1000000) {
+  async buildTransferTransaction(fromAccount: BeatozAccount, toAddress: string, amount: string, gas: number = 1000000): Promise<TrxProto> {
     return TrxProtoBuilder.buildTransferTrxProto({
       from: fromAccount.address,
       to: toAddress,

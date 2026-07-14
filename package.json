@@ -15,6 +15,7 @@
   "dependencies": {
     "@beatoz/web3": "^1.6.5",
     "@beatoz/web3-accounts": "^1.6.5",
+    "@beatoz/web3-types": "^1.6.5",
     "ethers": "^6.15.0"
   },
   "devDependencies": {
