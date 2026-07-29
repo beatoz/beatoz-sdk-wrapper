@@ -7,8 +7,8 @@ import { BeatozTxResult } from './beatoz-tx-result';
 import { ContractJson } from './contract-json';
 import { TrxProto } from '@beatoz/web3-types/lib/commonjs/trx_proto';
 
-export const DEFAULT_GAS = 2000000; // 10000000
 const DEPLOY_TO_ADDRESS = '0000000000000000000000000000000000000000';
+export const DEFAULT_GAS = 2_000_000; // 10000000
 
 export class BeatozContractDeployer {
   constructor(
