@@ -8,6 +8,7 @@ import {BeatozAccount} from './beatoz-account';
 import {ContractJson} from './contract-json';
 import {DEFAULT_GAS} from "./beatoz-contract-deployer";
 import {BeatozContractTx} from "./transactions";
+import {with0xPrefix} from "./beatoz-util";
 
 export class BeatozContract {
   readonly beatozChain: BeatozChain;
@@ -54,6 +55,10 @@ export class BeatozContract {
 
   async encodeFunctionData(methodName: string, ...args: any[]) {
     return await (this.contract.methods as any)[methodName](...args).encodeABI();
+  }
+
+  async decodeFunctionResult(methodName: string, response: any) {
+    return this.contractInterface.decodeFunctionResult(methodName, with0xPrefix(response.value.returnData));
   }
 
   async query(methodName: string, ...args: any[]) {

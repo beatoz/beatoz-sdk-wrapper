@@ -25,8 +25,10 @@ export class ContractJsonReader {
     return ContractJson.FromJsonString(fileContent);
   }
 
-  readContractJson(contractName: string): ContractJson {
-    const contractJsonFilePath = path.join(this.baseDir, `${contractName}.sol`, `${contractName}.json`);
+  readContractJson(contractName: string, subDirName: string = ''): ContractJson {
+    const contractJsonFilePath = subDirName
+      ? path.join(this.baseDir, subDirName, `${contractName}.sol`, `${contractName}.json`)
+      : path.join(this.baseDir, `${contractName}.sol`, `${contractName}.json`);
     return ContractJsonReader.readContractJson(contractJsonFilePath);
   }
 

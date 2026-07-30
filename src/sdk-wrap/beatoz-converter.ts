@@ -2,6 +2,7 @@
 
 import { Web3 } from '@beatoz/web3';
 import { BeatozChain } from './beatoz-chain';
+import { with0xPrefix } from './beatoz-util';
 
 export class BeatozConverter {
   readonly web3: Web3;
@@ -30,5 +31,15 @@ export class BeatozConverter {
 
   convertAddress(response: any) {
     return this.web3.beatoz.abi.decodeParameter('address', response.value.returnData) as string;
+  }
+
+  convertStrings(response: any, count: number): string[] {
+    return this.convertParameters(response, new Array(count).fill('string')) as string[];
+  }
+
+  // e.g. `function paymentSource() returns (string, string)` -> convertParameters(response, ['string', 'string'])
+  convertParameters(response: any, types: string[]): unknown[] {
+    const decoded = this.web3.beatoz.abi.decodeParameters(types, with0xPrefix(response.value.returnData));
+    return types.map((_, i) => decoded[i]);
   }
 }

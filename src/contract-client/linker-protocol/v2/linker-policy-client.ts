@@ -1,5 +1,14 @@
-import {BeatozAccount, BeatozChain, BeatozContract, BeatozContractDeployer, ContractJsonReader, DEFAULT_GAS} from "../../../sdk-wrap";
-import {with0xPrefix} from "../../../sdk-wrap/beatoz-util";
+import {
+  BeatozAccount,
+  BeatozChain,
+  BeatozContract,
+  BeatozContractDeployer,
+  BeatozProvider,
+  ContractJsonReader,
+  DEFAULT_GAS,
+  with0xPrefix
+} from "../../../sdk-wrap";
+import {BeatozQueryResult} from "../../../sdk-wrap/beatoz-query-result";
 
 export enum ConfigGroup {
   APPLICATION = 0,
@@ -41,24 +50,40 @@ export class LinkerPolicyClient extends BeatozContract {
     return txResult
   }
 
-  async verifyChannelEndorsementPolicy(ownerAccount: BeatozAccount, msgHash: string, signatures: string[], mspIds: string[], certChains: string[][], gas: number = 4_500_000) {
-    return await this.invoke(ownerAccount, "verifyChannelEndorsementPolicy", [with0xPrefix(msgHash), signatures, mspIds, certChains], gas)
+  async verifyChannelEndorsementPolicy(msgHash: string, signatures: string[], mspIds: string[], certChains: string[][]) {
+    const response = await this.query( "verifyChannelEndorsementPolicy", with0xPrefix(msgHash), signatures, mspIds, certChains)
+    const queryResult = BeatozQueryResult.fromQueryResponse(response)
+
+    if (queryResult.isFailed) {
+      // const hex = "0x" + response.value.returnData
+      // const decoded = new RevertDecoder(resolve(root, "artifacts/contracts")).decode(hex)
+      // console.log("revert:", decoded ?? hex)
+    }
+    return queryResult
   }
 
-  async verifyBlockValidationPolicy(account: BeatozAccount, msgHash: string, signatures: string[], mspIds: string[], certChains: string[][], gas: number = 4_500_000) {
-    return await this.invoke(account, "verifyChannelEndorsementPolicy", [with0xPrefix(msgHash), signatures, mspIds, certChains], gas)
+  async verifyBlockValidationPolicy(msgHash: string, signatures: string[], mspIds: string[], certChains: string[]) {
+    const queryResponse =  await this.query( "verifyBlockValidationPolicy", with0xPrefix(msgHash), signatures, mspIds, certChains)
+    const queryResult = BeatozQueryResult.fromQueryResponse(queryResponse)
+
+    if (queryResult.isFailed) {
+      // const hex = "0x" + response.value.returnData
+      // const decoded = new RevertDecoder(resolve(root, "artifacts/contracts")).decode(hex)
+      // console.log("revert:", decoded ?? hex)
+    }
+    return queryResult
   }
 
   async decodeSecurityPolicy(data: string) {
-    return await this.contract.methods.decodeSecurityPolicy(with0xPrefix(data)).call()
+    return await this.query( "decodeSecurityPolicy", with0xPrefix(data))
   }
 
   async decodeConfigPolicy(data: string) {
-    return await this.contract.methods.decodeConfigPolicy(with0xPrefix(data)).call();
+    return await this.query( "decodeConfigPolicy", with0xPrefix(data))
   }
 
   async decodeOrgPolicy(data: string) {
-    return await this.contract.methods.decodeOrgPolicy(with0xPrefix(data)).call();
+    return await this.query( "decodeOrgPolicy", with0xPrefix(data))
   }
 
   async getBlockValidationPolicy() {
