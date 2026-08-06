@@ -17,6 +17,12 @@ export interface Btip26PermissionStatusResult {
   paused: boolean;
 }
 
+export interface Btip26ComplianceRoles {
+  owner: string;
+  blacklister: string;
+  pauser: string;
+}
+
 export interface Btip26PendingTransfer {
   sender: string;
   amount: string;
@@ -111,6 +117,19 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
 
   async owner(): Promise<string> {
     return await this.readAddress('owner');
+  }
+
+  async blacklister(): Promise<string> {
+    return await this.readAddress('blacklister');
+  }
+
+  async pauser(): Promise<string> {
+    return await this.readAddress('pauser');
+  }
+
+  async complianceRoles(): Promise<Btip26ComplianceRoles> {
+    const [owner, blacklister, pauser] = await Promise.all([this.owner(), this.blacklister(), this.pauser()]);
+    return { owner, blacklister, pauser };
   }
 
   async decimals(): Promise<string> {
@@ -241,6 +260,14 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
     return await this.executeMethod(from, 'setPaused', [paused], gas);
   }
 
+  async updateBlacklister(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
+    return await this.executeMethod(from, 'updateBlacklister', [account], gas);
+  }
+
+  async updatePauser(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
+    return await this.executeMethod(from, 'updatePauser', [account], gas);
+  }
+
   async isPaused(): Promise<boolean> {
     return await this.readBool('isPaused');
   }
@@ -303,6 +330,10 @@ export class Btip26PermissionTokenClient extends BaseErc20Client {
 
   async whitelist(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
     return await this.executeMethod(from, 'whitelist', [account], gas);
+  }
+
+  async unwhitelist(from: BeatozTxSigner, account: string, gas: number = DEFAULT_GAS) {
+    return await this.executeMethod(from, 'unwhitelist', [account], gas);
   }
 
   async setUserLimit(from: BeatozTxSigner, account: string, limit: string, gas: number = DEFAULT_GAS) {
